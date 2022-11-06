@@ -1,16 +1,17 @@
-# wordle
+### Hi there :wave:
 
-A new Flutter project.
+This is Wordle game.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## How to play?
 
-A few resources to get you started if this is your first Flutter project:
+Guess the Wordle in some tries.
+Each guess must be a valid word.
+The color of the tiles will change to show how close your guess was to the word.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Example:
+- Green color: The letter is in the word and in the correct spot.
+- Yello color: The letter is in the word and in the wrong spot.
+- Grey color: The letter is not in the word in any spot.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### This app is made with Flutter Framework.

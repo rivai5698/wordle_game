@@ -46,6 +46,7 @@ dependencies:
   nice_buttons: ^0.0.1
   flutter_tts: ^3.5.3
   flutter_shake_animated: ^0.0.5
+  flutter_facebook_auth: ^5.0.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

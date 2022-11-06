@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -81,12 +80,20 @@ class _WordlePageState extends State<WordlePage> {
   Widget build(BuildContext context) {
     double widthDevice = MediaQuery.of(context).size.width;
     double heightDevice = MediaQuery.of(context).size.height;
+    if(widthDevice > heightDevice){
+      var temp = widthDevice;
+      widthDevice = heightDevice;
+      heightDevice = temp;
+    }
     return Stack(
       children: [
-        LottieBuilder.asset(
-          'assets/background.json',
-          height: heightDevice,
-          fit: BoxFit.fill,
+        Container(
+          color: Colors.black,
+          child: LottieBuilder.asset(
+            'assets/background.json',
+            height: heightDevice,
+            fit: BoxFit.fill,
+          ),
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
@@ -184,8 +191,12 @@ class _WordlePageState extends State<WordlePage> {
                 child: Center(
                   child: MyBoard(
                     board: board!,
-                    height: widthDevice / 7,
-                    width: widthDevice / 7,
+                    height: widthDevice < 600 && widthDevice > 280 ? widthDevice/7
+                    : widthDevice <= 280 ? widthDevice/10
+                        : widthDevice/9,
+                    width: widthDevice < 600 && widthDevice > 280 ? widthDevice/7
+                        : widthDevice <= 280 ? widthDevice/10
+                        : widthDevice/9,
                     flipCardKey: _flipCardKeys!,
                   ),
                   // child: StreamBuilder<Word>(
@@ -242,7 +253,7 @@ class _WordlePageState extends State<WordlePage> {
                 child: heightDevice < 680
                     ? MyKeyBoard(
                         height: 40,
-                        width: widthDevice / 12,
+                        width: widthDevice <= 280 ? widthDevice/15 :widthDevice / 12,
                         onKeyTap: _onKeyTap,
                         onDelTap: _onDelTap,
                         onEnterTap: _onEnterTap,

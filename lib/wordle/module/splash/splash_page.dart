@@ -1,9 +1,6 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:wordle/service/audio_service.dart';
-import 'package:wordle/wordle/module/game/wordle_bloc.dart';
-import 'package:wordle/wordle/module/game/wordle_page.dart';
 
 import '../../../common/toast/toast_overlay.dart';
 import '../../../service/check_internet_connection.dart';

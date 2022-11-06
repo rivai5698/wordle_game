@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nice_buttons/nice_buttons.dart';
-import 'package:wordle/service/audio_service.dart';
+import 'package:lottie/lottie.dart';
 
 class HelpDialog {
   final BuildContext context;
@@ -10,7 +9,7 @@ class HelpDialog {
         barrierDismissible: false,
         barrierColor: Colors.grey.withOpacity(0.2),
         barrierLabel:
-        MaterialLocalizations.of(context).modalBarrierDismissLabel,
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
         context: context,
         pageBuilder: (_, __, ___) {
           return Container(
@@ -70,7 +69,10 @@ class HelpDialog {
                   ),
                   Container(
                     decoration: BoxDecoration(color: Colors.yellow.shade200),
-                    child: Image.asset('assets/helpimg.png',fit: BoxFit.fitHeight,),
+                    child: Image.asset(
+                      'assets/helpimg.png',
+                      fit: BoxFit.fitHeight,
+                    ),
                   ),
                 ],
               ),
@@ -79,7 +81,7 @@ class HelpDialog {
           Positioned(
             right: 0,
             child: GestureDetector(
-              onTap: (){
+              onTap: () {
                 Navigator.pop(context);
               },
               child: Container(
@@ -88,13 +90,8 @@ class HelpDialog {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
                     color: Colors.yellow.shade300,
-                    border: Border.all(color: Colors.brown,width: 2)
-                ),
-                child:  const Icon(
-                  Icons.close,
-                  size: 24,
-                  color: Colors.brown,
-                ),
+                    border: Border.all(color: Colors.brown, width: 2)),
+                child: LottieBuilder.asset('assets/closebutton.json'),
               ),
             ),
           ),

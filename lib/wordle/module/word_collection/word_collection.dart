@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
-
 import '../../../common/toast/toast_loading.dart';
-import '../../../service/shared_preferences_manager.dart';
 import '../game/wordle_bloc.dart';
 import '../game/wordle_page.dart';
 
 class WordCollectionPage extends StatefulWidget {
   final String player;
   final bool isPlaying;
-  const WordCollectionPage({Key? key, required this.player, required this.isPlaying}) : super(key: key);
+  const WordCollectionPage(
+      {Key? key, required this.player, required this.isPlaying})
+      : super(key: key);
 
   @override
   State<WordCollectionPage> createState() => _WordCollectionPageState();
@@ -19,7 +19,7 @@ class WordCollectionPage extends StatefulWidget {
 
 class _WordCollectionPageState extends State<WordCollectionPage> {
   WordleBloc? wordleBloc;
-  List<String> collection=[];
+  List<String> collection = [];
   @override
   void initState() {
     wordleBloc = WordleBloc();
@@ -47,10 +47,13 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     print('_WordCollectionPageState.build $collection');
     return Stack(
       children: [
-        LottieBuilder.asset(
-          'assets/background.json',
-          height: heightDevice,
-          fit: BoxFit.fill,
+        Container(
+          color: Colors.black,
+          child: LottieBuilder.asset(
+            'assets/background.json',
+            height: heightDevice,
+            fit: BoxFit.fill,
+          ),
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
@@ -67,22 +70,21 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
           ),
           body: Column(
             children: [
-               StreamBuilder<List<String>>(
-                 builder: (_, snapshot) {
-                   if(snapshot.hasData){
-                     return Text(
-                       'You have collected ${collectionService.collection.length} words',
-                       style: const TextStyle(fontSize: 24, color: Colors.green),
-                     );
-                   }
-                   return Text(
-                     'You have collected ${collection.length} words',
-                     style: const TextStyle(fontSize: 24, color: Colors.green),
-                   );
-                 },
-                 stream: collectionService.collectionStream,
-
-               ),
+              StreamBuilder<List<String>>(
+                builder: (_, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      'You have collected ${collectionService.collection.length} words',
+                      style: const TextStyle(fontSize: 24, color: Colors.green),
+                    );
+                  }
+                  return Text(
+                    'You have collected ${collection.length} words',
+                    style: const TextStyle(fontSize: 24, color: Colors.green),
+                  );
+                },
+                stream: collectionService.collectionStream,
+              ),
               const SizedBox(
                 height: 16,
               ),
@@ -97,25 +99,28 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                       border: Border.all(color: Colors.white)),
                   child: StreamBuilder<List<String>>(
                     stream: collectionService.collectionStream,
-                    builder: (_,snapshot){
-                      print('_WordCollectionPageState.build snap ${snapshot.data}');
-                      if(snapshot.hasData){
+                    builder: (_, snapshot) {
+                      print(
+                          '_WordCollectionPageState.build snap ${snapshot.data}');
+                      if (snapshot.hasData) {
                         return GridView.builder(
                           itemCount: collectionService.collection.length,
                           itemBuilder: (_, index) {
                             return _word(collectionService.collection[index]);
                           },
                           gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisSpacing: 30,
-                              mainAxisSpacing: 30,
-                              mainAxisExtent: 30,
-                              crossAxisCount: 3),
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisSpacing: 30,
+                                  mainAxisSpacing: 30,
+                                  mainAxisExtent: 30,
+                                  crossAxisCount: 3),
                         );
                       }
-                      return Center(child: CircularProgressIndicator(color: Colors.green.shade300,));
+                      return Center(
+                          child: CircularProgressIndicator(
+                        color: Colors.green.shade300,
+                      ));
                     },
-
                   ),
                 ),
               ),
@@ -229,7 +234,6 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
   }
 
   Widget _word(String word) {
-
     return Container(
       width: 100,
       height: 30,
@@ -254,7 +258,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                   ? Colors.blue
                   : Colors.red,
         ),
-        child:  Center(child: Text(word)),
+        child: Center(child: Text(word)),
       ),
     );
   }

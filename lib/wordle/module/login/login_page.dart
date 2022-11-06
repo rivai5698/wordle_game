@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
 import 'package:wordle/common/dialog/help_dialog.dart';
@@ -9,13 +7,15 @@ import 'package:wordle/common/toast/toast_loading.dart';
 import 'package:wordle/service/audio_service.dart';
 import 'package:wordle/service/shared_preferences_manager.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection.dart';
-
-import 'dart:io' show Platform, exit;
 import '../game/wordle_bloc.dart';
 import '../game/wordle_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key, required this.player, required this.isPlaying, required this.audioCheck})
+  const LoginPage(
+      {Key? key,
+      required this.player,
+      required this.isPlaying,
+      required this.audioCheck})
       : super(key: key);
   final String player;
   final bool isPlaying;
@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     //_audioService = AudioService();
     Future.delayed(const Duration(seconds: 0), () {
       setState(() {
-        turns +=0.5;
+        turns += 0.5;
       });
       initTurn();
     });
@@ -91,10 +91,13 @@ class _LoginPageState extends State<LoginPage> {
     double heightDevice = MediaQuery.of(context).size.height;
     return Stack(
       children: [
-        LottieBuilder.asset(
-          'assets/background.json',
-          height: heightDevice,
-          fit: BoxFit.fill,
+        Container(
+          color: Colors.black,
+          child: LottieBuilder.asset(
+            'assets/background.json',
+            height: heightDevice,
+            fit: BoxFit.fill,
+          ),
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
@@ -232,10 +235,12 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: (finish) {
                         HelpDialog(context).showDialog();
                       },
-                      child:
-                        Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: LottieBuilder.asset('assets/questionbutton.json',)),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: LottieBuilder.asset(
+                          'assets/questionbutton.json',
+                        ),
+                      ),
                       // const Icon(
                       //   Icons.question_mark_sharp,
                       //   color: Colors.white,
@@ -255,15 +260,14 @@ class _LoginPageState extends State<LoginPage> {
                           isPlaying = audioStreamService.isPlaying;
                           audioCheck = audioStreamService.audioCheck;
                         });
-                        Future.delayed(Duration.zero,(){
-                          SettingDialog(context, isPlaying!, onTap,audioCheck!).showDialog();
+                        Future.delayed(Duration.zero, () {
+                          SettingDialog(context, isPlaying!, onTap, audioCheck!)
+                              .showDialog();
                         });
                       },
-                      child: LottieBuilder.asset('assets/settingbutton.json',),
-                      // const Icon(
-                      //   Icons.settings,
-                      //   color: Colors.white,
-                      // ),
+                      child: LottieBuilder.asset(
+                        'assets/settingbutton.json',
+                      ),
                     ),
                   ],
                 ),
@@ -319,10 +323,10 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> onTap() async {
     bool? audioCheck = await sharedPrefs.getBool('audio');
     print('_LoginPageState.onTap $audioCheck');
-    if(audioCheck!){
+    if (audioCheck!) {
       //sharedPrefs.setBool('audio', false);
       audioStreamService.setTts(false);
-    }else{
+    } else {
       //sharedPrefs.setBool('audio', true);
       audioStreamService.setTts(true);
     }
