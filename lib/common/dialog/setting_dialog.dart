@@ -13,7 +13,7 @@ class SettingDialog {
   final VoidCallback onTap;
   Future<void> showDialog() async {
     await sharedPrefs.init();
-    print('SettingDialog.showDialog $isPlaying and $audioCheck');
+    //print('SettingDialog.showDialog $isPlaying and $audioCheck');
     // sharedPrefs.setBool('isPlaying', isPlaying);
     // audioCheck = await sharedPrefs.getBool('audio');
     // if(audioCheck==null){
@@ -164,8 +164,8 @@ class SettingDialog {
                                 stream: audioStreamService.audioStream,
                                 builder: (_, snapshot) {
                                   if (snapshot.hasData) {
-                                    var check = snapshot.data;
-                                    print('a: $check');
+                                    //var check = snapshot.data;
+                                    //print('a: $check');
                                     return NiceButtons(
                                       stretch: false,
                                       startColor: Colors.green.shade300,
@@ -176,7 +176,7 @@ class SettingDialog {
                                       gradientOrientation:
                                           GradientOrientation.Horizontal,
                                       onTap: (finish) {
-                                        print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
+                                        //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
                                         if (audioStreamService.assetsAudioPlayer
                                             .isPlaying.value) {
                                           audioStreamService.pauseAudio();
@@ -202,7 +202,7 @@ class SettingDialog {
                                     gradientOrientation:
                                         GradientOrientation.Horizontal,
                                     onTap: (finish) {
-                                      print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
+                                      //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
                                       if (audioStreamService
                                           .assetsAudioPlayer.isPlaying.value) {
                                         audioStreamService.pauseAudio();

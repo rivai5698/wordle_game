@@ -141,8 +141,8 @@ class _WordlePageState extends State<WordlePage> {
             actions: [
               GestureDetector(
                 onTap: () {
-                  coinStream.removeCoin();
                   if(coinStream.coin!>0){
+                    coinStream.removeCoin();
                     if(pos<_currentWord!.letters.length){
                       setState(() {
                         for (var i = 0; i < _currentWord!.letters.length; i++) {
