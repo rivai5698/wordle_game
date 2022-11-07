@@ -146,15 +146,20 @@ class _WordlePageState extends State<WordlePage> {
                   if(coinStream.coin!>0){
                     if(pos<_currentWord!.letters.length){
                       coinStream.removeCoin();
-                      setState(() {
-                        for (var i = 0; i < _currentWord!.letters.length; i++) {
-                          _currentWord!.letters[pos] =
-                              solution!.letters[pos].copyWith(status: LetterStatus.correct);
-                        }
-                      });
-                      setState(() {
-                        pos = pos+1;
-                      });
+                      // setState(() {
+                      //  // for (var i = 0; i < _currentWord!.letters.length; i++) {
+                      //   // _currentWord!.letters[pos] =
+                      //    //    solution!.letters[pos].copyWith(status: LetterStatus.correct);
+                      //   //_currentWord!.addLetter(solution!.letters[pos].copyWith(status: LetterStatus.correct).val);
+                      //   //}
+                      // });
+                      _onKeyTap(solution!.letters[pos].val);
+                      keyBoardLetter.add(_currentWord!.letters[pos]);
+                      //_flipCardKeys![_currentWordIndex][pos].currentState!.toggleCard();
+                      // setState(() {
+                      //   pos = pos+1;
+                      // });
+
                     }
                   }else{
                     ToastOverlay(context).show(type: ToastType.warning,msg: 'You\'re run out of coins');
@@ -383,6 +388,7 @@ class _WordlePageState extends State<WordlePage> {
   void _onKeyTap(String val) {
     if (status == GameStatus.playing) {
       setState(() {
+        pos = pos + 1;
         _currentWord?.addLetter(val);
       });
     }
@@ -391,6 +397,9 @@ class _WordlePageState extends State<WordlePage> {
   void _onDelTap() {
     if (status == GameStatus.playing) {
       setState(() {
+        if(pos>0){
+          pos = pos -1;
+        }
         _currentWord?.removeLetter();
       });
     }
@@ -404,6 +413,7 @@ class _WordlePageState extends State<WordlePage> {
         for (var i = 0; i < _currentWord!.letters.length; i++) {
           status = GameStatus.submitting;
           final currentWordLetter = _currentWord!.letters[i];
+          print('currentWordLetter $currentWordLetter');
           final currentSolutionLetter = solution!.letters[i];
           setState(() {
             if (currentWordLetter == currentSolutionLetter) {
@@ -610,6 +620,7 @@ class _WordlePageState extends State<WordlePage> {
     await wordleBloc!.genWord(widget.level);
     toastLoadingOverlay.hide();
     setState(() {
+      pos=0;
       answer = 'WORDLE';
       status = GameStatus.playing;
       _currentWordIndex = 0;
