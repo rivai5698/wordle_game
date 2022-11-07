@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:wordle/common/board/board.dart';
+import 'package:wordle/common/dialog/coin_dialog.dart';
 import 'package:wordle/common/dialog/setting_dialog.dart';
 import 'package:wordle/common/keyboard/my_keyboard.dart';
 import 'package:wordle/common/toast/toast_loading.dart';
@@ -101,6 +102,7 @@ class _WordlePageState extends State<WordlePage> {
           ),
         ),
         Scaffold(
+          resizeToAvoidBottomInset: false,
           backgroundColor: Colors.transparent,
           appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -244,9 +246,14 @@ class _WordlePageState extends State<WordlePage> {
                     // ),
                   ),
                 ),
-                Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8,),
-                    child: _coinWidget()),
+                GestureDetector(
+                  onTap: (){
+                    CoinDialog(context,coinStream.coin ?? 0).showDialog();
+                  },
+                  child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8,),
+                      child: _coinWidget()),
+                ),
                 Expanded(
                   child: Center(
                     child: Text(
