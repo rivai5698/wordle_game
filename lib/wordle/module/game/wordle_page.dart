@@ -519,6 +519,7 @@ class _WordlePageState extends State<WordlePage> {
     if (a == null) {
       collection.addAll([]);
     } else {
+      collection.clear();
       collection.addAll(a);
     }
     if (_currentWord!.wordStr == solution?.wordStr) {
