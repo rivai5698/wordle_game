@@ -23,9 +23,9 @@ class WordleBloc {
     await genService.genWord(length: level).then((value){
        solution = Word.fromString(value.replaceAll('[','').replaceAll(']', '').trim().toUpperCase());
       _wordStreamController.add(Word.fromString(value.replaceAll('[','').replaceAll(']', '').trim().toUpperCase()));
-       print('sol: ${solution!.wordStr}');
+       print('solution: ${solution!.wordStr}');
     }).catchError((e){
-      print(e);
+      //print(e);
     });
   }
 

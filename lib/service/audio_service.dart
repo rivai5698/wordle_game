@@ -26,7 +26,7 @@ class AudioService {
 
   Future<bool> getTts() async {
     audioCheck = (await sharedPrefs.getBool('audio'))!;
-    print('audiocheck: $audioCheck');
+    //print('audiocheck: $audioCheck');
     _ttsStreamController.add(audioCheck!);
     // if(audioCheck){
     //   sharedPrefs.setBool('audio', false);

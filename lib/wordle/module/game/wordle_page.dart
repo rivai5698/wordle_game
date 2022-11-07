@@ -11,6 +11,7 @@ import 'package:wordle/const/const_color.dart';
 import 'package:wordle/service/audio_service.dart';
 import 'package:wordle/service/check_grammar_api_service.dart';
 import 'package:wordle/service/check_grammar_service.dart';
+import 'package:wordle/wordle/module/game/coin_bloc.dart';
 import 'package:wordle/wordle/module/game/wordle_bloc.dart';
 import 'package:wordle/wordle/module/login/login_page.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
@@ -50,6 +51,8 @@ class _WordlePageState extends State<WordlePage> {
   Word? solution;
   List<String> collection = [];
   Set<Letter> keyBoardLetter = {};
+  int? coins;
+  int pos = 0;
 
   @override
   void initState() {
@@ -59,6 +62,7 @@ class _WordlePageState extends State<WordlePage> {
     wordleBloc = WordleBloc();
     board = genBoard(widget.level);
     _flipCardKeys = genFlipCard(widget.level);
+    coinStream.initCoin();
     solution = widget.solution;
     answer = 'WORDLE';
     flutterTts.setStartHandler(() {});
@@ -80,7 +84,8 @@ class _WordlePageState extends State<WordlePage> {
   Widget build(BuildContext context) {
     double widthDevice = MediaQuery.of(context).size.width;
     double heightDevice = MediaQuery.of(context).size.height;
-    if(widthDevice > heightDevice){
+
+    if (widthDevice > heightDevice) {
       var temp = widthDevice;
       widthDevice = heightDevice;
       heightDevice = temp;
@@ -98,51 +103,89 @@ class _WordlePageState extends State<WordlePage> {
         Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            leading: GestureDetector(
-              onTap: () async {
-                await hideSM();
-                Future.delayed(Duration.zero, () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => LoginPage(
-                                player: widget.player,
-                                isPlaying: isPlaying,
-                            audioCheck:  audioCheck,
-                              )),
-                      (route) => false);
-                });
-                //stream.closeStream();
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    //borderRadius: BorderRadius.circular(50),
-                    color: Colors.transparent,
-                    border: Border.all(color: Colors.white, width: 2)),
-                child: LottieBuilder.asset(
-                  'assets/backbutton.json',
-                ),
-                // const Icon(
-                //   Icons.settings,
-                //   size: 16,
-                //   color: Colors.white,
-                // ),
-              ),
-            ),
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            // leading: GestureDetector(
+            //   onTap: () async {
+            //     await hideSM();
+            //     Future.delayed(Duration.zero, () {
+            //       Navigator.pushAndRemoveUntil(
+            //           context,
+            //           MaterialPageRoute(
+            //               builder: (_) => LoginPage(
+            //                     player: widget.player,
+            //                     isPlaying: isPlaying,
+            //                     audioCheck: audioCheck,
+            //                   )),
+            //           (route) => false);
+            //     });
+            //     //stream.closeStream();
+            //   },
+            //   child: Container(
+            //     margin: const EdgeInsets.symmetric(horizontal: 8),
+            //     decoration: BoxDecoration(
+            //         shape: BoxShape.circle,
+            //         //borderRadius: BorderRadius.circular(50),
+            //         color: Colors.transparent,
+            //         border: Border.all(color: Colors.white, width: 2)),
+            //     child: LottieBuilder.asset(
+            //       'assets/backbutton.json',
+            //     ),
+            //     // const Icon(
+            //     //   Icons.settings,
+            //     //   size: 16,
+            //     //   color: Colors.white,
+            //     // ),
+            //   ),
+            // ),
             actions: [
+              GestureDetector(
+                onTap: () {
+                  coinStream.removeCoin();
+                  if(coinStream.coin!>0){
+                    if(pos<_currentWord!.letters.length){
+                      setState(() {
+                        for (var i = 0; i < _currentWord!.letters.length; i++) {
+                          _currentWord!.letters[pos] =
+                              solution!.letters[pos].copyWith(status: LetterStatus.correct);
+                        }
+                      });
+                      setState(() {
+                        pos = pos+1;
+                      });
+                    }
+                  }else{
+                    ToastOverlay(context).show(type: ToastType.warning,msg: 'You\'re run out of coins');
+                  }
+
+                  },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  width: 42,
+                  height: 42,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      //borderRadius: BorderRadius.circular(50),
+                      color: Colors.transparent,
+                      border: Border.all(color: Colors.white, width: 2)),
+                  child: LottieBuilder.asset(
+                    'assets/light.json',
+                  ),
+                ),
+              ),
               GestureDetector(
                 onTap: () {
                   setState(() {
                     isPlaying = audioStreamService.isPlaying;
                     audioCheck = audioStreamService.audioCheck!;
                   });
-                  SettingDialog(context, isPlaying, onTap,audioCheck).showDialog();
+                  SettingDialog(context, isPlaying, onTap, audioCheck)
+                      .showDialog();
                   //stream.closeStream();
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  margin:  const EdgeInsets.all(8),
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
@@ -161,13 +204,62 @@ class _WordlePageState extends State<WordlePage> {
                 ),
               ),
             ],
-            title: Text(
-              answer!,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: widget.level == 6 ? 24 : 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.005),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    await hideSM();
+                    Future.delayed(Duration.zero, () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => LoginPage(
+                                    player: widget.player,
+                                    isPlaying: isPlaying,
+                                    audioCheck: audioCheck,
+                                  )),
+                          (route) => false);
+                    });
+                    //stream.closeStream();
+                  },
+                  child: Container(
+                    //margin: const EdgeInsets.symmetric(horizontal: 8),
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        //borderRadius: BorderRadius.circular(50),
+                        color: Colors.transparent,
+                        border: Border.all(color: Colors.white, width: 2)),
+                    child: LottieBuilder.asset(
+                      'assets/backbutton.json',
+                      width: 32,
+                    ),
+                    // const Icon(
+                    //   Icons.settings,
+                    //   size: 16,
+                    //   color: Colors.white,
+                    // ),
+                  ),
+                ),
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8,),
+                    child: _coinWidget()),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      answer!,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: widget.level == 6 ? 28 : 32,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.005),
+                    ),
+                  ),
+                ),
+              ],
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -191,12 +283,16 @@ class _WordlePageState extends State<WordlePage> {
                 child: Center(
                   child: MyBoard(
                     board: board!,
-                    height: widthDevice < 600 && widthDevice > 280 ? widthDevice/7
-                    : widthDevice <= 280 ? widthDevice/10
-                        : widthDevice/9,
-                    width: widthDevice < 600 && widthDevice > 280 ? widthDevice/7
-                        : widthDevice <= 280 ? widthDevice/10
-                        : widthDevice/9,
+                    height: widthDevice < 600 && widthDevice > 280
+                        ? widthDevice / 7
+                        : widthDevice <= 280
+                            ? widthDevice / 10
+                            : widthDevice / 9,
+                    width: widthDevice < 600 && widthDevice > 280
+                        ? widthDevice / 7
+                        : widthDevice <= 280
+                            ? widthDevice / 10
+                            : widthDevice / 9,
                     flipCardKey: _flipCardKeys!,
                   ),
                   // child: StreamBuilder<Word>(
@@ -253,7 +349,9 @@ class _WordlePageState extends State<WordlePage> {
                 child: heightDevice < 680
                     ? MyKeyBoard(
                         height: 40,
-                        width: widthDevice <= 280 ? widthDevice/15 :widthDevice / 12,
+                        width: widthDevice <= 280
+                            ? widthDevice / 15
+                            : widthDevice / 12,
                         onKeyTap: _onKeyTap,
                         onDelTap: _onDelTap,
                         onEnterTap: _onEnterTap,
@@ -295,9 +393,7 @@ class _WordlePageState extends State<WordlePage> {
     if (status == GameStatus.playing &&
         _currentWord != null &&
         !_currentWord!.letters.contains(Letter.empty())) {
-      var check = await checkGrammar(_currentWord!.wordStr);
-      if (check) {
-        print('check: $check');
+      if (_currentWord!.wordStr == solution!.wordStr) {
         for (var i = 0; i < _currentWord!.letters.length; i++) {
           status = GameStatus.submitting;
           final currentWordLetter = _currentWord!.letters[i];
@@ -330,23 +426,103 @@ class _WordlePageState extends State<WordlePage> {
         }
         checkWin();
       } else {
-        Future.delayed(Duration.zero, () {
-          ToastOverlay(context)
-              .show(type: ToastType.warning, msg: 'Not in word list');
-        });
+        var check = await checkGrammar(_currentWord!.wordStr);
+        if (check) {
+          //print('check: $check');
+          for (var i = 0; i < _currentWord!.letters.length; i++) {
+            status = GameStatus.submitting;
+            final currentWordLetter = _currentWord!.letters[i];
+            final currentSolutionLetter = solution!.letters[i];
+            setState(() {
+              if (currentWordLetter == currentSolutionLetter) {
+                _currentWord!.letters[i] =
+                    currentWordLetter.copyWith(status: LetterStatus.correct);
+              } else if (solution!.letters.contains(currentWordLetter)) {
+                _currentWord!.letters[i] =
+                    currentWordLetter.copyWith(status: LetterStatus.inWord);
+              } else {
+                _currentWord!.letters[i] =
+                    currentWordLetter.copyWith(status: LetterStatus.notInWord);
+              }
+            });
+            final letter = keyBoardLetter.firstWhere(
+              (e) => e.val == currentWordLetter.val,
+              orElse: () => Letter.empty(),
+            );
+            if (letter.status != LetterStatus.correct) {
+              keyBoardLetter.removeWhere((e) => e.val == currentWordLetter.val);
+              keyBoardLetter.add(_currentWord!.letters[i]);
+            }
+            await Future.delayed(
+              const Duration(microseconds: 150),
+              () => _flipCardKeys![_currentWordIndex][i]
+                  .currentState!
+                  .toggleCard(),
+            );
+          }
+          checkWin();
+        } else {
+          Future.delayed(Duration.zero, () {
+            ToastOverlay(context)
+                .show(type: ToastType.warning, msg: 'Not in word list');
+          });
+        }
       }
     }
+  }
+
+  Widget _coinWidget() {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          //borderRadius: BorderRadius.circular(50),
+          color: Colors.transparent,
+          border: Border.all(color: Colors.white, width: 2)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            child: StreamBuilder<int>(
+              stream: coinStream.coinStream,
+              builder: (_, snapshot) {
+                if (snapshot.hasData) {
+                  String coin = snapshot.data.toString();
+                  if (snapshot.data! >= 1000) {
+                    coin = snapshot.data.toString().replaceRange(coin.length - 3, coin.length, 'K');
+                  }
+                  return Text(
+                    coin,
+                    style: const TextStyle(fontSize: 12),
+                  );
+                }
+                return const Text(
+                  '0',
+                  style: TextStyle(fontSize: 12),
+                );
+              },
+            ),
+          ),
+          const Icon(
+            Icons.currency_bitcoin,
+            size: 12,
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> checkWin() async {
     await sharedPrefs.init();
     var a = await sharedPrefs.getStringList('collections');
-    if(a==null){
+    if (a == null) {
       collection.addAll([]);
-    }else{
+    } else {
       collection.addAll(a);
     }
     if (_currentWord!.wordStr == solution?.wordStr) {
+      coinStream.addCoin(widget.level-2);
       status = GameStatus.won;
       setState(() {
         collection.add(solution!.wordStr);
@@ -376,7 +552,7 @@ class _WordlePageState extends State<WordlePage> {
     } else if (_currentWordIndex + 1 >= board!.length) {
       status = GameStatus.lost;
       setState(() {
-        answer = 'Answer is: ${solution?.wordStr}';
+        answer = '${solution?.wordStr}';
       });
       _speak('The answer is ${answer!.toLowerCase()}, good luck for next time');
       Future.delayed(Duration.zero, () {
@@ -404,13 +580,13 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   Future<bool> checkGrammar(String word) async {
-    var str;
+    dynamic str;
     await checkService.checkWord(word: word).then((value) {
-      print(value.toString());
+      //print(value.toString());
       str = value.toString();
       return true;
     }).catchError((e) {
-      print(e);
+      //print(e);
       return false;
     });
     if (str == null) {
@@ -429,18 +605,20 @@ class _WordlePageState extends State<WordlePage> {
       answer = 'WORDLE';
       status = GameStatus.playing;
       _currentWordIndex = 0;
-      board!
-        ..clear()
-        ..addAll(List.generate(
-            widget.level + 1,
-            (_) => Word(
-                letters: List.generate(widget.level, (_) => Letter.empty()))));
-      _flipCardKeys!
-        ..clear()
-        ..addAll(List.generate(
-            widget.level + 1,
-            (_) => List.generate(
-                widget.level, (_) => GlobalKey<FlipCardState>())));
+      board = genBoard(widget.level);
+      _flipCardKeys = genFlipCard(widget.level);
+      // board!
+      //   ..clear()
+      //   ..addAll(List.generate(
+      //       widget.level + 1,
+      //       (_) => Word(
+      //           letters: List.generate(widget.level, (_) => Letter.empty()))));
+      // _flipCardKeys!
+      //   ..clear()
+      //   ..addAll(List.generate(
+      //       widget.level + 1,
+      //       (_) => List.generate(
+      //           widget.level, (_) => GlobalKey<FlipCardState>())));
       solution = wordleBloc!.solution;
     });
     keyBoardLetter.clear();
@@ -448,8 +626,8 @@ class _WordlePageState extends State<WordlePage> {
 
   genBoard(int level) {
     if (level == 3) {
-      return List.generate(level + 2,
-              (_) => Word(letters: List.generate(level, (_) => Letter.empty())));
+      return List.generate(level + 3,
+          (_) => Word(letters: List.generate(level, (_) => Letter.empty())));
     } else {
       return List.generate(level + 1,
           (_) => Word(letters: List.generate(level, (_) => Letter.empty())));
@@ -457,43 +635,40 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   genFlipCard(int level) {
-    if(level == 3){
-      return List.generate(level + 2,
-              (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
-
-    }else{
+    if (level == 3) {
+      return List.generate(level + 3,
+          (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
+    } else {
       return List.generate(level + 1,
-              (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
-
+          (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
     }
-      }
-
+  }
 
   Future<void> onTap() async {
     bool? audioCheck = await sharedPrefs.getBool('audio');
-    if(audioCheck!){
+    if (audioCheck!) {
       //sharedPrefs.setBool('audio', false);
       audioStreamService.setTts(false);
-    }else{
+    } else {
       //sharedPrefs.setBool('audio', true);
       audioStreamService.setTts(true);
     }
-    print('audio: $audioCheck');
+    //print('audio: $audioCheck');
   }
 
   //Future<void> onTap() async {
-    // await hideSM();
-    // Future.delayed(Duration.zero, () {
-    //   Navigator.pushAndRemoveUntil(
-    //       context,
-    //       MaterialPageRoute(
-    //           builder: (_) => LoginPage(
-    //                 player: widget.player,
-    //                 isPlaying: widget.isPlaying,
-    //               )),
-    //       (route) => false);
-    // });
- // }
+  // await hideSM();
+  // Future.delayed(Duration.zero, () {
+  //   Navigator.pushAndRemoveUntil(
+  //       context,
+  //       MaterialPageRoute(
+  //           builder: (_) => LoginPage(
+  //                 player: widget.player,
+  //                 isPlaying: widget.isPlaying,
+  //               )),
+  //       (route) => false);
+  // });
+  // }
 
   Future<void> hideSM() async {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -501,12 +676,11 @@ class _WordlePageState extends State<WordlePage> {
 
   Future _speak(String text) async {
     bool audioCheck = audioStreamService.audioCheck!;
-    if(audioCheck){
+    if (audioCheck) {
       await flutterTts.setVoice({"name": "Karen", "locale": "en-AU"});
       await flutterTts.setLanguage("en-US");
       await flutterTts.setPitch(1);
       await flutterTts.speak(text);
     }
-
   }
 }

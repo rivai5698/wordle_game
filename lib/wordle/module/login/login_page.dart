@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
         });
       });
     }
-    print(turns);
+    //print(turns);
   }
 
   initTurn2() {
@@ -322,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> onTap() async {
     bool? audioCheck = await sharedPrefs.getBool('audio');
-    print('_LoginPageState.onTap $audioCheck');
+    //print('_LoginPageState.onTap $audioCheck');
     if (audioCheck!) {
       //sharedPrefs.setBool('audio', false);
       audioStreamService.setTts(false);

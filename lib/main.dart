@@ -1,24 +1,11 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:wordle/wordle/module/splash/splash_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-    // initialiaze the facebook javascript SDK
-    await FacebookAuth.instance.webAndDesktopInitialize(
-      appId: "1329834907365798",
-      cookie: true,
-      xfbml: true,
-      version: "v14.0",
-    );
-  }
   runApp(const MyApp());
 }
 

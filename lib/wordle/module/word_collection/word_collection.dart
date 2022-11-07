@@ -44,7 +44,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
   Widget build(BuildContext context) {
     double heightDevice = MediaQuery.of(context).size.height;
     double widthDevice = MediaQuery.of(context).size.width;
-    print('_WordCollectionPageState.build $collection');
+   // print('_WordCollectionPageState.build $collection');
     return Stack(
       children: [
         Container(
@@ -57,7 +57,8 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(
+          appBar:
+          AppBar(
             centerTitle: false,
             backgroundColor: Colors.transparent,
             title: const Text(
@@ -100,8 +101,8 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                   child: StreamBuilder<List<String>>(
                     stream: collectionService.collectionStream,
                     builder: (_, snapshot) {
-                      print(
-                          '_WordCollectionPageState.build snap ${snapshot.data}');
+                     // print(
+                     //     '_WordCollectionPageState.build snap ${snapshot.data}');
                       if (snapshot.hasData) {
                         return GridView.builder(
                           itemCount: collectionService.collection.length,
@@ -268,7 +269,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     toastLoadingOverlay.show();
     await wordleBloc?.genWord(level);
     var sol = wordleBloc?.solution;
-    print('sol: ${sol!.wordStr}');
+    print('solution: ${sol!.wordStr}');
     toastLoadingOverlay.hide();
     Future.delayed(Duration.zero, () {
       Navigator.pushAndRemoveUntil(

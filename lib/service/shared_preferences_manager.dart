@@ -42,6 +42,12 @@ class SharedPreferencesManager{
     return _prefs?.getBool(key);
   }
 
+  Future setInt(String key, int value) async{
+    await _prefs?.setInt(key, value);
+  }
+  Future<int?> getInt(String key)async{
+    return _prefs?.getInt(key);
+  }
 
 
 }
