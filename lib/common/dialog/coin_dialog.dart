@@ -74,6 +74,7 @@ class CoinDialog {
                   Container(
                       decoration: BoxDecoration(color: Colors.yellow.shade200),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -108,34 +109,48 @@ class CoinDialog {
                             child: TextField(
                               decoration: const InputDecoration(
                                 labelText: 'Input Code: ',
+                                counterText: '',
                               ),
                               textCapitalization: TextCapitalization.characters,
-                              onSubmitted: (str) async {
-                                bool? claimed = await sharedPrefs.getBool('claimed');
-                                if(claimed == null){
-                                  if (str == 'WORDLE') {
-                                    sharedPrefs.setBool('claimed', true);
-                                    coinStream.addCoin(1000);
-                                    Future.delayed(Duration.zero,(){
-                                      ToastOverlay(context).show(
-                                          type: ToastType.success,
-                                          msg: 'You have claimed 1000 coins');
-                                    });
-                                  } else {
-                                    Future.delayed(Duration.zero,(){
-                                      ToastOverlay(context).show(
-                                          type: ToastType.success,
-                                          msg: 'Code is invalid');
-                                    });
-                                  }
-                                }else{
-                                  Future.delayed(Duration.zero,(){
-                                    ToastOverlay(context).show(
-                                        type: ToastType.warning,
-                                        msg: 'You have claimed this code');
-                                  });
-                                }
+                              maxLength: 6,
+                              maxLines: 1,
 
+                              onSubmitted: (str) async {
+                                if(str!=''){
+                                  bool? claimed =
+                                  await sharedPrefs.getBool('claimed');
+                                  if (claimed == null) {
+                                    if (str == 'WORDLE') {
+                                      sharedPrefs.setBool('claimed', true);
+                                      coinStream.addCoin(1000);
+                                      Future.delayed(Duration.zero, () {
+                                        ToastOverlay(context).show(
+                                            type: ToastType.success,
+                                            msg: 'You have claimed 1000 coins');
+                                      });
+                                    } else {
+                                      Future.delayed(Duration.zero, () {
+                                        ToastOverlay(context).show(
+                                            type: ToastType.error,
+                                            msg: 'Code is invalid');
+                                      });
+                                    }
+                                  } else {
+                                    if (str == 'WORDLE') {
+                                      Future.delayed(Duration.zero, () {
+                                        ToastOverlay(context).show(
+                                            type: ToastType.warning,
+                                            msg: 'You have claimed this code');
+                                      });
+                                    } else {
+                                      Future.delayed(Duration.zero, () {
+                                        ToastOverlay(context).show(
+                                            type: ToastType.error,
+                                            msg: 'Code is invalid');
+                                      });
+                                    }
+                                  }
+                                }
                               },
                             ),
                           ),
