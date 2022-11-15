@@ -7,7 +7,7 @@ import 'package:wordle/common/toast/toast_loading.dart';
 import 'package:wordle/service/audio_service.dart';
 import 'package:wordle/service/shared_preferences_manager.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection.dart';
-import '../game/wordle_bloc.dart';
+import '../game/wordle_service.dart';
 import '../game/wordle_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -26,26 +26,30 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   //AudioService? _audioService;
-  WordleBloc? wordleBloc;
+  WordleService? wordleBloc;
   bool? isPlaying;
   bool? audioCheck;
   double turns = 0.0;
+  bool isRun = true;
   bool isOk = true;
   @override
   void initState() {
     // TODO: implement initState
     isPlaying = audioStreamService.getPlay();
     audioCheck = audioStreamService.audioCheck;
-    wordleBloc = WordleBloc();
+    wordleBloc = WordleService();
     isPlaying = widget.isPlaying;
     audioCheck = widget.audioCheck;
     //_audioService = AudioService();
-    Future.delayed(const Duration(seconds: 0), () {
-      setState(() {
-        turns += 0.5;
+    if (isRun) {
+      Future.delayed(const Duration(seconds: 0), () {
+        setState(() {
+          turns += 0.5;
+        });
+        initTurn();
       });
-      initTurn();
-    });
+    }
+
     // setState(() { });
     super.initState();
   }
@@ -202,6 +206,10 @@ class _LoginPageState extends State<LoginPage> {
                       borderColor: Colors.green,
                       gradientOrientation: GradientOrientation.Horizontal,
                       onTap: (finish) {
+                        setState(() {
+                          isRun = false;
+                          isOk = false;
+                        });
                         Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -286,14 +294,16 @@ class _LoginPageState extends State<LoginPage> {
     var toastLoadingOverlay = ToastLoadingOverlay(context);
     toastLoadingOverlay.show();
     await wordleBloc?.genWord(level);
+    //await wordleBloc?.genDefinition();
     var sol = wordleBloc?.solution;
-
+    var def = wordleBloc?.definitions;
     toastLoadingOverlay.hide();
     Future.delayed(Duration.zero, () {
       Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => WordlePage(
+            definition: def!,
             isPlaying: widget.isPlaying,
             solution: sol!,
             player: widget.player,

@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:wordle/common/board/board.dart';
 import 'package:wordle/common/dialog/coin_dialog.dart';
 import 'package:wordle/common/dialog/setting_dialog.dart';
+import 'package:wordle/common/dialog/suggestion_dialog.dart';
 import 'package:wordle/common/keyboard/my_keyboard.dart';
 import 'package:wordle/common/toast/toast_loading.dart';
 import 'package:wordle/common/toast/toast_overlay.dart';
@@ -13,7 +14,7 @@ import 'package:wordle/service/audio_service.dart';
 import 'package:wordle/service/check_grammar_api_service.dart';
 import 'package:wordle/service/check_grammar_service.dart';
 import 'package:wordle/wordle/module/game/coin_bloc.dart';
-import 'package:wordle/wordle/module/game/wordle_bloc.dart';
+import 'package:wordle/wordle/module/game/wordle_service.dart';
 import 'package:wordle/wordle/module/login/login_page.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
 import '../../../service/shared_preferences_manager.dart';
@@ -22,6 +23,7 @@ import '../../model/word_model.dart';
 
 class WordlePage extends StatefulWidget {
   final Word solution;
+  final String definition;
   final String player;
   final bool isPlaying;
   final int level;
@@ -31,6 +33,7 @@ class WordlePage extends StatefulWidget {
       required this.solution,
       required this.player,
       required this.level,
+      required this.definition,
       required this.isPlaying});
 
   @override
@@ -38,7 +41,7 @@ class WordlePage extends StatefulWidget {
 }
 
 class _WordlePageState extends State<WordlePage> {
-  WordleBloc? wordleBloc;
+  WordleService? wordleBloc;
   FlutterTts flutterTts = FlutterTts();
   List<Word>? board;
   GameStatus status = GameStatus.playing;
@@ -54,13 +57,14 @@ class _WordlePageState extends State<WordlePage> {
   Set<Letter> keyBoardLetter = {};
   int? coins;
   int pos = 0;
+  String hintWord = 'Updating';
 
   @override
   void initState() {
     // TODO: implement initState
     isPlaying = audioStreamService.isPlaying;
     audioCheck = audioStreamService.audioCheck!;
-    wordleBloc = WordleBloc();
+    wordleBloc = WordleService();
     board = genBoard(widget.level);
     _flipCardKeys = genFlipCard(widget.level);
     coinStream.initCoin();
@@ -69,6 +73,11 @@ class _WordlePageState extends State<WordlePage> {
     flutterTts.setStartHandler(() {});
     flutterTts.setCompletionHandler(() {});
     super.initState();
+    print('_WordlePageState.initState ${widget.definition} ${widget.solution.wordStr}');
+    hintWord = widget.definition;
+    // Future.delayed(Duration.zero, () async {
+    //   hintWord = await saveDefinition(solution!.wordStr);
+    // });
   }
 
   @override
@@ -143,8 +152,8 @@ class _WordlePageState extends State<WordlePage> {
             actions: [
               GestureDetector(
                 onTap: () {
-                  if(coinStream.coin!>0){
-                    if(pos<_currentWord!.letters.length){
+                  if (coinStream.coin! > 0) {
+                    if (pos < _currentWord!.letters.length) {
                       coinStream.removeCoin();
                       // setState(() {
                       //  // for (var i = 0; i < _currentWord!.letters.length; i++) {
@@ -159,13 +168,13 @@ class _WordlePageState extends State<WordlePage> {
                       // setState(() {
                       //   pos = pos+1;
                       // });
-
                     }
-                  }else{
-                    ToastOverlay(context).show(type: ToastType.warning,msg: 'You\'re run out of coins');
+                  } else {
+                    ToastOverlay(context).show(
+                        type: ToastType.warning,
+                        msg: 'You\'re run out of coins');
                   }
-
-                  },
+                },
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   width: 42,
@@ -192,7 +201,7 @@ class _WordlePageState extends State<WordlePage> {
                   //stream.closeStream();
                 },
                 child: Container(
-                  margin:  const EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(8),
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
@@ -252,11 +261,13 @@ class _WordlePageState extends State<WordlePage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: (){
-                    CoinDialog(context,coinStream.coin ?? 0).showDialog();
+                  onTap: () {
+                    CoinDialog(context, coinStream.coin ?? 0).showDialog();
                   },
                   child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8,),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                      ),
                       child: _coinWidget()),
                 ),
                 Expanded(
@@ -288,8 +299,23 @@ class _WordlePageState extends State<WordlePage> {
               Container(
                 color: Colors.transparent,
                 height: heightDevice < 680 && widget.level == 6
-                    ? 0
+                    ? heightDevice / 15
                     : heightDevice / 12,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                ),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.info_outline,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      SuggestionDialog(context, hintWord, 'hint').showDialog();
+                    },
+                  ),
+                ),
               ),
               Expanded(
                 child: Center(
@@ -397,8 +423,8 @@ class _WordlePageState extends State<WordlePage> {
   void _onDelTap() {
     if (status == GameStatus.playing) {
       setState(() {
-        if(pos>0){
-          pos = pos -1;
+        if (pos > 0) {
+          pos = pos - 1;
         }
         _currentWord?.removeLetter();
       });
@@ -413,7 +439,7 @@ class _WordlePageState extends State<WordlePage> {
         for (var i = 0; i < _currentWord!.letters.length; i++) {
           status = GameStatus.submitting;
           final currentWordLetter = _currentWord!.letters[i];
-          print('currentWordLetter $currentWordLetter');
+          //print('currentWordLetter $currentWordLetter');
           final currentSolutionLetter = solution!.letters[i];
           setState(() {
             if (currentWordLetter == currentSolutionLetter) {
@@ -507,7 +533,9 @@ class _WordlePageState extends State<WordlePage> {
                 if (snapshot.hasData) {
                   String coin = snapshot.data.toString();
                   if (snapshot.data! >= 1000) {
-                    coin = snapshot.data.toString().replaceRange(coin.length - 3, coin.length, 'K');
+                    coin = snapshot.data
+                        .toString()
+                        .replaceRange(coin.length - 3, coin.length, 'K');
                   }
                   return Text(
                     coin,
@@ -540,7 +568,7 @@ class _WordlePageState extends State<WordlePage> {
       collection.addAll(a);
     }
     if (_currentWord!.wordStr == solution?.wordStr) {
-      coinStream.addCoin(widget.level-2);
+      coinStream.addCoin(widget.level - 2);
       status = GameStatus.won;
       setState(() {
         collection.add(solution!.wordStr);
@@ -550,6 +578,7 @@ class _WordlePageState extends State<WordlePage> {
           'Congratulation! the answer is ${solution!.wordStr.toLowerCase()}');
       Future.delayed(Duration.zero, () {
         sharedPrefs.setStringList('collections', collection);
+        sharedPrefs.setString(solution!.wordStr, hintWord);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             dismissDirection: DismissDirection.none,
@@ -601,10 +630,12 @@ class _WordlePageState extends State<WordlePage> {
     dynamic str;
     await checkService.checkWord(word: word).then((value) {
       //print(value.toString());
-      str = value.toString();
+      //str = value.toString();
+      //print(value);
+      str = value;
       return true;
     }).catchError((e) {
-      //print(e);
+      print(e);
       return false;
     });
     if (str == null) {
@@ -612,15 +643,17 @@ class _WordlePageState extends State<WordlePage> {
     } else {
       return true;
     }
+    //return false;
   }
 
   Future<void> _restart() async {
     ToastLoadingOverlay toastLoadingOverlay = ToastLoadingOverlay(context);
     toastLoadingOverlay.show();
     await wordleBloc!.genWord(widget.level);
+    //await wordleBloc!.genDefinition();
     toastLoadingOverlay.hide();
     setState(() {
-      pos=0;
+      pos = 0;
       answer = 'WORDLE';
       status = GameStatus.playing;
       _currentWordIndex = 0;
@@ -639,6 +672,7 @@ class _WordlePageState extends State<WordlePage> {
       //       (_) => List.generate(
       //           widget.level, (_) => GlobalKey<FlipCardState>())));
       solution = wordleBloc!.solution;
+      hintWord = wordleBloc!.definitions!;
     });
     keyBoardLetter.clear();
   }
@@ -661,6 +695,25 @@ class _WordlePageState extends State<WordlePage> {
       return List.generate(level + 1,
           (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
     }
+  }
+
+  Future<String> saveDefinition(String word) async {
+    String definition = 'The word\'s not defined';
+    await checkService.checkWord(word: word).then((value) {
+      definition = ' ';
+      if (value.meanings!.isNotEmpty) {
+        for (int i = 0; i < value.meanings!.length; i++) {
+          for (int i = 0; i < value.meanings![i].definitions!.length; i++) {
+            definition =
+                '$definition ${value.meanings![i].definitions![i].definition!}\n';
+          }
+        }
+      }
+      //return definition;
+    }).catchError((e) {
+      //print(e);
+    });
+    return definition;
   }
 
   Future<void> onTap() async {

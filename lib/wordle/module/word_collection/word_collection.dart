@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
+import 'package:wordle/common/dialog/suggestion_dialog.dart';
+import 'package:wordle/service/shared_preferences_manager.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
 import '../../../common/toast/toast_loading.dart';
-import '../game/wordle_bloc.dart';
+import '../game/wordle_service.dart';
 import '../game/wordle_page.dart';
 
 class WordCollectionPage extends StatefulWidget {
@@ -18,11 +20,11 @@ class WordCollectionPage extends StatefulWidget {
 }
 
 class _WordCollectionPageState extends State<WordCollectionPage> {
-  WordleBloc? wordleBloc;
+  WordleService? wordleBloc;
   List<String> collection = [];
   @override
   void initState() {
-    wordleBloc = WordleBloc();
+    wordleBloc = WordleService();
     collectionService.init();
     collection.addAll(collectionService.collection);
     super.initState();
@@ -33,12 +35,12 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     //List<String>? a = await sharedPrefs.getStringList('collections');
   }
 
-  @override
-  void setState(VoidCallback fn) {
-    myInit();
-    // TODO: implement setState
-    super.setState(fn);
-  }
+  // @override
+  // void setState(VoidCallback fn) {
+  //   myInit();
+  //   // TODO: implement setState
+  //   super.setState(fn);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,12 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
           backgroundColor: Colors.transparent,
           appBar:
           AppBar(
+            // leading: IconButton(
+            //   icon: const Icon(Icons.arrow_back_ios),
+            //   onPressed: (){
+            //
+            //   },
+            // ),
             centerTitle: false,
             backgroundColor: Colors.transparent,
             title: const Text(
@@ -235,31 +243,39 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
   }
 
   Widget _word(String word) {
-    return Container(
-      width: 100,
-      height: 30,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: word.length == 3
-            ? Colors.green.shade400
-            : word.length == 5
-                ? Colors.blue.shade400
-                : Colors.red.shade400,
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(4),
-      ),
+    return GestureDetector(
+      onTap: () async {
+        String? def = await sharedPrefs.getString(word);
+        Future.delayed(Duration.zero,(){
+          SuggestionDialog(context,def!,word).showDialog();
+        });
+        },
       child: Container(
         width: 100,
         height: 30,
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           color: word.length == 3
-              ? Colors.green
+              ? Colors.green.shade400
               : word.length == 5
-                  ? Colors.blue
-                  : Colors.red,
+                  ? Colors.blue.shade400
+                  : Colors.red.shade400,
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(4),
         ),
-        child: Center(child: Text(word)),
+        child: Container(
+          width: 100,
+          height: 30,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: word.length == 3
+                ? Colors.green
+                : word.length == 5
+                    ? Colors.blue
+                    : Colors.red,
+          ),
+          child: Center(child: Text(word)),
+        ),
       ),
     );
   }
@@ -269,6 +285,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     toastLoadingOverlay.show();
     await wordleBloc?.genWord(level);
     var sol = wordleBloc?.solution;
+    var def = wordleBloc?.definitions;
     print('solution: ${sol!.wordStr}');
     toastLoadingOverlay.hide();
     Future.delayed(Duration.zero, () {
@@ -276,6 +293,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
         context,
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => WordlePage(
+            definition: def!,
             isPlaying: widget.isPlaying,
             solution: sol,
             player: widget.player,
