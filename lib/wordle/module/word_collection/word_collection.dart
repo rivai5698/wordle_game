@@ -153,7 +153,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                           const Align(
                               alignment: Alignment.topLeft,
                               child: Text(
-                                'Chose level',
+                                'SELECT THE LEVEL',
                                 style: TextStyle(
                                     color: Colors.green,
                                     fontSize: 24,
@@ -177,7 +177,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                     GradientOrientation.Horizontal,
                                 onTap: (finish) {
                                   //audioStream.pauseAudio();
-                                  choseLevel(3);
+                                  selectLevel(3);
                                 },
                                 child: const Text(
                                   'EASY',
@@ -199,7 +199,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                     GradientOrientation.Horizontal,
                                 onTap: (finish) {
                                   //audioStream.pauseAudio();
-                                  choseLevel(5);
+                                  selectLevel(5);
                                 },
                                 child: const Text(
                                   'CASUAL',
@@ -221,7 +221,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                     GradientOrientation.Horizontal,
                                 onTap: (finish) {
                                   //audioStream.pauseAudio();
-                                  choseLevel(6);
+                                  selectLevel(6);
                                 },
                                 child: const Text(
                                   'HARD',
@@ -280,13 +280,13 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     );
   }
 
-  Future choseLevel(int level) async {
+  Future selectLevel(int level) async {
     var toastLoadingOverlay = ToastLoadingOverlay(context);
     toastLoadingOverlay.show();
     await wordleBloc?.genWord(level);
     var sol = wordleBloc?.solution;
     var def = wordleBloc?.definitions;
-    print('solution: ${sol!.wordStr}');
+    //print('solution: ${sol!.wordStr}');
     toastLoadingOverlay.hide();
     Future.delayed(Duration.zero, () {
       Navigator.pushAndRemoveUntil(
@@ -295,7 +295,7 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
           pageBuilder: (_, __, ___) => WordlePage(
             definition: def!,
             isPlaying: widget.isPlaying,
-            solution: sol,
+            solution: sol!,
             player: widget.player,
             level: level,
           ),

@@ -43,7 +43,7 @@ class _SplashPageState extends State<SplashPage> {
     // audioStream.init();
     if(await checkNetwork()){
       //audioStream.closeStream();
-      print('connected to internet');
+      //print('connected to internet');
 
       String id = idGenerator();
       await sharedPrefs.init();
@@ -63,7 +63,7 @@ class _SplashPageState extends State<SplashPage> {
       }
 
       bool? isPlaying  = await sharedPrefs.getBool('isPlayed');
-      print('_SplashPageState.initConnect $isPlaying and $audioCheck' );
+      //print('_SplashPageState.initConnect $isPlaying and $audioCheck' );
       if(isPlaying == null){
         audioStreamService.init();
       }else{

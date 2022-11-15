@@ -22,7 +22,7 @@ class WordleService {
        //_definitionsStreamController.add(definitions!);
        //_wordStreamController.add(Word.fromString(value.replaceAll('[','').replaceAll(']', '').trim().toUpperCase()));
        await genDefinition();
-       print('solution: ${solution!.wordStr}');
+       //print('solution: ${solution!.wordStr}');
     }).catchError((e){
       //print(e);
     });

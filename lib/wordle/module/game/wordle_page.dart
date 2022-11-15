@@ -72,9 +72,10 @@ class _WordlePageState extends State<WordlePage> {
     answer = 'WORDLE';
     flutterTts.setStartHandler(() {});
     flutterTts.setCompletionHandler(() {});
-    super.initState();
-    print('_WordlePageState.initState ${widget.definition} ${widget.solution.wordStr}');
     hintWord = widget.definition;
+    super.initState();
+    print('_WordlePageState.initState ${solution!.wordStr} $hintWord');
+
     // Future.delayed(Duration.zero, () async {
     //   hintWord = await saveDefinition(solution!.wordStr);
     // });
@@ -673,6 +674,7 @@ class _WordlePageState extends State<WordlePage> {
       //           widget.level, (_) => GlobalKey<FlipCardState>())));
       solution = wordleBloc!.solution;
       hintWord = wordleBloc!.definitions!;
+      print('_WordlePageState.restart ${solution!.wordStr} $hintWord');
     });
     keyBoardLetter.clear();
   }

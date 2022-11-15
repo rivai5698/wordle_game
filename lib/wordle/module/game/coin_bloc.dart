@@ -15,7 +15,7 @@ class CoinBloc{
     sharedPrefs.setInt('coin', 5);
     coin = await sharedPrefs.getInt('coin');
     }
-    print('coin $coin');
+    //print('coin $coin');
     _coinStreamController.add(coin!);
   }
 

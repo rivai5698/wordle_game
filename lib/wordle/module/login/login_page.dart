@@ -136,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         gradientOrientation: GradientOrientation.Horizontal,
                         onTap: (finish) {
                           //audioStream.pauseAudio();
-                          choseLevel(3);
+                          selectLevel(3);
                         },
                         child: const Text(
                           'EASY',
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                         gradientOrientation: GradientOrientation.Horizontal,
                         onTap: (finish) {
                           //audioStream.pauseAudio();
-                          choseLevel(5);
+                          selectLevel(5);
                         },
                         child: const Text(
                           'CASUAL',
@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                         gradientOrientation: GradientOrientation.Horizontal,
                         onTap: (finish) {
                           //audioStream.pauseAudio();
-                          choseLevel(6);
+                          selectLevel(6);
                         },
                         child: const Text(
                           'HARD',
@@ -287,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future choseLevel(int level) async {
+  Future selectLevel(int level) async {
     setState(() {
       isOk = false;
     });
