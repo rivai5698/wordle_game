@@ -10,11 +10,6 @@ class WordleService {
   List<Word> board = [];
   Word? solution;
   String? definitions;
-  // GameStatus gameStatus = GameStatus.playing;
-  // //int?level;
-  // WordleService(){
-  //   //genWord(level!);
-  // }
 
   Future genWord(int level) async {
     await genService.genWord(length: level).then((value)  async {

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
+import 'package:provider/provider.dart';
 import 'package:wordle/common/dialog/suggestion_dialog.dart';
+import 'package:wordle/const/assets_const.dart';
+import 'package:wordle/service/app_state.dart';
 import 'package:wordle/service/shared_preferences_manager.dart';
+import 'package:wordle/wordle/module/login/login_page.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
 import '../../../common/toast/toast_loading.dart';
+import '../../../generated/l10n.dart';
 import '../game/wordle_service.dart';
 import '../game/wordle_page.dart';
 
@@ -46,32 +51,54 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
   Widget build(BuildContext context) {
     double heightDevice = MediaQuery.of(context).size.height;
     double widthDevice = MediaQuery.of(context).size.width;
-   // print('_WordCollectionPageState.build $collection');
+    // print('_WordCollectionPageState.build $collection');
     return Stack(
       children: [
-        Container(
-          color: Colors.black,
-          child: LottieBuilder.asset(
-            'assets/background.json',
-            height: heightDevice,
-            fit: BoxFit.fill,
-          ),
+        Consumer<AppState>(
+          builder: (_, state, __) {
+            return Container(
+              color: state.isDarkMode ? Colors.black : Colors.white,
+              child: LottieBuilder.asset(
+                background,
+                height: heightDevice,
+              ),
+            );
+          },
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          appBar:
-          AppBar(
-            // leading: IconButton(
-            //   icon: const Icon(Icons.arrow_back_ios),
-            //   onPressed: (){
-            //
-            //   },
-            // ),
-            centerTitle: false,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Consumer<AppState>(
+                builder: (_, state, __) {
+                  return Icon(
+                    Icons.arrow_back_ios,
+                    color: state.isDarkMode ? Colors.white : Colors.black,
+                  );
+                },
+              ),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => LoginPage(
+                      player: widget.player,
+                      isPlaying: widget.isPlaying,
+                    ),
+                    transitionDuration: const Duration(seconds: 1),
+                    transitionsBuilder: (_, a, __, c) =>
+                        FadeTransition(opacity: a, child: c),
+                  ),
+                  (route) => false,
+                );
+              },
+            ),
+            centerTitle: true,
             backgroundColor: Colors.transparent,
-            title: const Text(
-              'Collection',
-              style: TextStyle(
+            elevation: 0,
+            title: Text(
+              S.of(context).collection,
+              style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 32,
                   color: Colors.green),
@@ -83,12 +110,12 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                 builder: (_, snapshot) {
                   if (snapshot.hasData) {
                     return Text(
-                      'You have collected ${collectionService.collection.length} words',
+                      '${S.of(context).col_word} ${collectionService.collection.length} ${S.of(context).word}',
                       style: const TextStyle(fontSize: 24, color: Colors.green),
                     );
                   }
                   return Text(
-                    'You have collected ${collection.length} words',
+                    '${S.of(context).col_word} ${collectionService.collection.length} ${S.of(context).word}',
                     style: const TextStyle(fontSize: 24, color: Colors.green),
                   );
                 },
@@ -98,39 +125,47 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                 height: 16,
               ),
               Expanded(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  width: widthDevice,
-                  margin: const EdgeInsets.only(left: 16, right: 16),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white)),
-                  child: StreamBuilder<List<String>>(
-                    stream: collectionService.collectionStream,
-                    builder: (_, snapshot) {
-                     // print(
-                     //     '_WordCollectionPageState.build snap ${snapshot.data}');
-                      if (snapshot.hasData) {
-                        return GridView.builder(
-                          itemCount: collectionService.collection.length,
-                          itemBuilder: (_, index) {
-                            return _word(collectionService.collection[index]);
-                          },
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisSpacing: 30,
-                                  mainAxisSpacing: 30,
-                                  mainAxisExtent: 30,
-                                  crossAxisCount: 3),
-                        );
-                      }
-                      return Center(
-                          child: CircularProgressIndicator(
-                        color: Colors.green.shade300,
-                      ));
-                    },
-                  ),
+                child: Consumer<AppState>(
+                  builder: (_, state, __) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                      width: widthDevice,
+                      margin: const EdgeInsets.only(left: 16, right: 16),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color:
+                                state.isDarkMode ? Colors.white : Colors.black,
+                          )),
+                      child: StreamBuilder<List<String>>(
+                        stream: collectionService.collectionStream,
+                        builder: (_, snapshot) {
+                          // print(
+                          //     '_WordCollectionPageState.build snap ${snapshot.data}');
+                          if (snapshot.hasData) {
+                            return GridView.builder(
+                              itemCount: collectionService.collection.length,
+                              itemBuilder: (_, index) {
+                                return _word(
+                                    collectionService.collection[index]);
+                              },
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisSpacing: 30,
+                                      mainAxisSpacing: 30,
+                                      mainAxisExtent: 30,
+                                      crossAxisCount: 3),
+                            );
+                          }
+                          return Center(
+                              child: CircularProgressIndicator(
+                            color: Colors.green.shade300,
+                          ));
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(
@@ -150,11 +185,11 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                       ),
                       child: Column(
                         children: [
-                          const Align(
+                          Align(
                               alignment: Alignment.topLeft,
                               child: Text(
-                                'SELECT THE LEVEL',
-                                style: TextStyle(
+                                S.of(context).sel,
+                                style: const TextStyle(
                                     color: Colors.green,
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold),
@@ -179,9 +214,9 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                   //audioStream.pauseAudio();
                                   selectLevel(3);
                                 },
-                                child: const Text(
-                                  'EASY',
-                                  style: TextStyle(
+                                child: Text(
+                                  S.of(context).easy,
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold),
@@ -201,9 +236,9 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                   //audioStream.pauseAudio();
                                   selectLevel(5);
                                 },
-                                child: const Text(
-                                  'CASUAL',
-                                  style: TextStyle(
+                                child: Text(
+                                  S.of(context).casual,
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold),
@@ -223,9 +258,9 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
                                   //audioStream.pauseAudio();
                                   selectLevel(6);
                                 },
-                                child: const Text(
-                                  'HARD',
-                                  style: TextStyle(
+                                child: Text(
+                                  S.of(context).hard,
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold),
@@ -246,10 +281,10 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
     return GestureDetector(
       onTap: () async {
         String? def = await sharedPrefs.getString(word);
-        Future.delayed(Duration.zero,(){
-          SuggestionDialog(context,def!,word).showDialog();
+        Future.delayed(Duration.zero, () {
+          SuggestionDialog(context, def!, word).showDialog();
         });
-        },
+      },
       child: Container(
         width: 100,
         height: 30,
@@ -305,18 +340,6 @@ class _WordCollectionPageState extends State<WordCollectionPage> {
         ),
         (route) => false,
       );
-
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (_) => WordlePage(
-      //               solution: sol,
-      //               player: widget.player,
-      //               level: level,
-      //             ),
-      //
-      //     ),
-      //     (route) => false);
     });
   }
 }

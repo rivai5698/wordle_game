@@ -1,7 +1,9 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:lottie/lottie.dart';
+import 'package:material_dialogs/material_dialogs.dart';
+import 'package:material_dialogs/widgets/buttons/icon_button.dart';
+import 'package:provider/provider.dart';
 import 'package:wordle/common/board/board.dart';
 import 'package:wordle/common/dialog/coin_dialog.dart';
 import 'package:wordle/common/dialog/setting_dialog.dart';
@@ -9,7 +11,8 @@ import 'package:wordle/common/dialog/suggestion_dialog.dart';
 import 'package:wordle/common/keyboard/my_keyboard.dart';
 import 'package:wordle/common/toast/toast_loading.dart';
 import 'package:wordle/common/toast/toast_overlay.dart';
-import 'package:wordle/const/const_color.dart';
+import 'package:wordle/const/assets_const.dart';
+import 'package:wordle/service/app_state.dart';
 import 'package:wordle/service/audio_service.dart';
 import 'package:wordle/service/check_grammar_api_service.dart';
 import 'package:wordle/service/check_grammar_service.dart';
@@ -17,6 +20,7 @@ import 'package:wordle/wordle/module/game/coin_bloc.dart';
 import 'package:wordle/wordle/module/game/wordle_service.dart';
 import 'package:wordle/wordle/module/login/login_page.dart';
 import 'package:wordle/wordle/module/word_collection/word_collection_bloc.dart';
+import '../../../generated/l10n.dart';
 import '../../../service/shared_preferences_manager.dart';
 import '../../model/letter_model.dart';
 import '../../model/word_model.dart';
@@ -61,7 +65,6 @@ class _WordlePageState extends State<WordlePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     isPlaying = audioStreamService.isPlaying;
     audioCheck = audioStreamService.audioCheck!;
     wordleBloc = WordleService();
@@ -75,10 +78,6 @@ class _WordlePageState extends State<WordlePage> {
     hintWord = widget.definition;
     super.initState();
     print('_WordlePageState.initState ${solution!.wordStr} $hintWord');
-
-    // Future.delayed(Duration.zero, () async {
-    //   hintWord = await saveDefinition(solution!.wordStr);
-    // });
   }
 
   @override
@@ -103,13 +102,13 @@ class _WordlePageState extends State<WordlePage> {
     }
     return Stack(
       children: [
-        Container(
-          color: Colors.black,
-          child: LottieBuilder.asset(
-            'assets/background.json',
-            height: heightDevice,
-            fit: BoxFit.fill,
-          ),
+        Consumer<AppState>(
+          builder: (_,state,__){
+            return Container(
+              color: state.isDarkMode ?Colors.black : Colors.white,
+
+            );
+          },
         ),
         Scaffold(
           resizeToAvoidBottomInset: false,
@@ -117,78 +116,37 @@ class _WordlePageState extends State<WordlePage> {
           appBar: AppBar(
             automaticallyImplyLeading: false,
             centerTitle: true,
-            // leading: GestureDetector(
-            //   onTap: () async {
-            //     await hideSM();
-            //     Future.delayed(Duration.zero, () {
-            //       Navigator.pushAndRemoveUntil(
-            //           context,
-            //           MaterialPageRoute(
-            //               builder: (_) => LoginPage(
-            //                     player: widget.player,
-            //                     isPlaying: isPlaying,
-            //                     audioCheck: audioCheck,
-            //                   )),
-            //           (route) => false);
-            //     });
-            //     //stream.closeStream();
-            //   },
-            //   child: Container(
-            //     margin: const EdgeInsets.symmetric(horizontal: 8),
-            //     decoration: BoxDecoration(
-            //         shape: BoxShape.circle,
-            //         //borderRadius: BorderRadius.circular(50),
-            //         color: Colors.transparent,
-            //         border: Border.all(color: Colors.white, width: 2)),
-            //     child: LottieBuilder.asset(
-            //       'assets/backbutton.json',
-            //     ),
-            //     // const Icon(
-            //     //   Icons.settings,
-            //     //   size: 16,
-            //     //   color: Colors.white,
-            //     // ),
-            //   ),
-            // ),
             actions: [
               GestureDetector(
                 onTap: () {
                   if (coinStream.coin! > 0) {
                     if (pos < _currentWord!.letters.length) {
                       coinStream.removeCoin();
-                      // setState(() {
-                      //  // for (var i = 0; i < _currentWord!.letters.length; i++) {
-                      //   // _currentWord!.letters[pos] =
-                      //    //    solution!.letters[pos].copyWith(status: LetterStatus.correct);
-                      //   //_currentWord!.addLetter(solution!.letters[pos].copyWith(status: LetterStatus.correct).val);
-                      //   //}
-                      // });
                       _onKeyTap(solution!.letters[pos].val);
-                      keyBoardLetter.add(_currentWord!.letters[pos]);
-                      //_flipCardKeys![_currentWordIndex][pos].currentState!.toggleCard();
-                      // setState(() {
-                      //   pos = pos+1;
-                      // });
+                      keyBoardLetter.add(_currentWord!.letters[pos-1].copyWith(status: LetterStatus.correct));
                     }
                   } else {
                     ToastOverlay(context).show(
                         type: ToastType.warning,
-                        msg: 'You\'re run out of coins');
+                        msg: S.of(context).runOutCoins);
                   }
                 },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  width: 42,
-                  height: 42,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      //borderRadius: BorderRadius.circular(50),
-                      color: Colors.transparent,
-                      border: Border.all(color: Colors.white, width: 2)),
-                  child: LottieBuilder.asset(
-                    'assets/light.json',
-                  ),
+                child: Consumer<AppState>(
+                  builder: (_,state,__){
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 42,
+                      height: 42,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.transparent,
+                          border: Border.all(color: state.isDarkMode ? Colors.white : Colors.black, width: 2)),
+                      child: LottieBuilder.asset(
+                        state.isDarkMode ? lightSuggestButton : darkSuggestButton,
+                      ),
+                    );
+                  },
                 ),
               ),
               GestureDetector(
@@ -199,25 +157,22 @@ class _WordlePageState extends State<WordlePage> {
                   });
                   SettingDialog(context, isPlaying, onTap, audioCheck)
                       .showDialog();
-                  //stream.closeStream();
                 },
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      //borderRadius: BorderRadius.circular(50),
-                      color: Colors.transparent,
-                      border: Border.all(color: Colors.white, width: 2)),
-                  child: LottieBuilder.asset(
-                    'assets/settingbutton.json',
-                  ),
-                  // const Icon(
-                  //   Icons.settings,
-                  //   size: 16,
-                  //   color: Colors.white,
-                  // ),
+                child: Consumer<AppState>(
+                  builder: (_,state,__){
+                    return Container(
+                      margin: const EdgeInsets.all(8),
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.transparent,
+                          border: Border.all(color: state.isDarkMode ? Colors.white : Colors.black, width: 2)),
+                      child: LottieBuilder.asset(
+                        state.isDarkMode ? lightSettingButton : darkSettingButton,
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -227,38 +182,25 @@ class _WordlePageState extends State<WordlePage> {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    await hideSM();
-                    Future.delayed(Duration.zero, () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => LoginPage(
-                                    player: widget.player,
-                                    isPlaying: isPlaying,
-                                    audioCheck: audioCheck,
-                                  )),
-                          (route) => false);
-                    });
-                    //stream.closeStream();
+                    backToLoginPage();
+
                   },
-                  child: Container(
-                    //margin: const EdgeInsets.symmetric(horizontal: 8),
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        //borderRadius: BorderRadius.circular(50),
-                        color: Colors.transparent,
-                        border: Border.all(color: Colors.white, width: 2)),
-                    child: LottieBuilder.asset(
-                      'assets/backbutton.json',
-                      width: 32,
-                    ),
-                    // const Icon(
-                    //   Icons.settings,
-                    //   size: 16,
-                    //   color: Colors.white,
-                    // ),
+                  child: Consumer<AppState>(
+                    builder: (_,state,__){
+                      return Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            //borderRadius: BorderRadius.circular(50),
+                            color: Colors.transparent,
+                            border: Border.all(color: state.isDarkMode ? Colors.white : Colors.black, width: 2)),
+                        child: LottieBuilder.asset(
+                          state.isDarkMode ? lightBackButton : darkBackButton,
+                          width: 32,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 GestureDetector(
@@ -273,13 +215,17 @@ class _WordlePageState extends State<WordlePage> {
                 ),
                 Expanded(
                   child: Center(
-                    child: Text(
-                      answer!,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: widget.level == 6 ? 28 : 32,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.005),
+                    child: Consumer<AppState>(
+                      builder: (_,state,__){
+                        return Text(
+                          answer!,
+                          style: TextStyle(
+                              color: state.isDarkMode ? Colors.white : Colors.black,
+                              fontSize: widget.level == 6 ? 28 : 32,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.005),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -308,12 +254,16 @@ class _WordlePageState extends State<WordlePage> {
                 child: Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.info_outline,
-                      color: Colors.white,
+                    icon: Consumer<AppState>(
+                      builder: (_,state,__){
+                        return Icon(
+                          Icons.info_outline,
+                          color: state.isDarkMode ? Colors.white :Colors.black,
+                        );
+                      },
                     ),
                     onPressed: () {
-                      SuggestionDialog(context, hintWord, 'hint').showDialog();
+                      SuggestionDialog(context, hintWord, S.of(context).hint).showDialog();
                     },
                   ),
                 ),
@@ -334,53 +284,6 @@ class _WordlePageState extends State<WordlePage> {
                             : widthDevice / 9,
                     flipCardKey: _flipCardKeys!,
                   ),
-                  // child: StreamBuilder<Word>(
-                  //   stream: wordleBloc!.streamWord,
-                  //   builder: (_, snapshot) {
-                  //     //ToastLoadingOverlay toast = ToastLoadingOverlay(context);
-                  //     // toast.show();
-                  //     if (snapshot.hasError) {
-                  //       return const Center(
-                  //         child: Text('Error'),
-                  //       );
-                  //     }
-                  //     if (snapshot.hasData) {
-                  //       solution = snapshot.data;
-                  //       if (heightDevice < 680) {
-                  //         return MyBoard(
-                  //           board: board,
-                  //           height: widthDevice / 7,
-                  //           width: widthDevice / 7,
-                  //           flipCardKey: _flipCardKeys,
-                  //         );
-                  //       } else {
-                  //         return MyBoard(
-                  //           board: board,
-                  //           height: widthDevice / 7,
-                  //           width: widthDevice / 7,
-                  //           flipCardKey: _flipCardKeys,
-                  //         );
-                  //       }
-                  //     }
-                  //     return Center(
-                  //       child: AnimatedTextKit(
-                  //         repeatForever: true,
-                  //         animatedTexts: [
-                  //           FadeAnimatedText(
-                  //             'Loading',
-                  //             textStyle: const TextStyle(
-                  //                 fontSize: 32.0, fontWeight: FontWeight.bold),
-                  //           ),
-                  //           ScaleAnimatedText(
-                  //             'Loading',
-                  //             textStyle: const TextStyle(
-                  //                 fontSize: 70.0, fontFamily: 'Canterbury'),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                 ),
               ),
               Container(),
@@ -440,7 +343,6 @@ class _WordlePageState extends State<WordlePage> {
         for (var i = 0; i < _currentWord!.letters.length; i++) {
           status = GameStatus.submitting;
           final currentWordLetter = _currentWord!.letters[i];
-          //print('currentWordLetter $currentWordLetter');
           final currentSolutionLetter = solution!.letters[i];
           setState(() {
             if (currentWordLetter == currentSolutionLetter) {
@@ -472,7 +374,6 @@ class _WordlePageState extends State<WordlePage> {
       } else {
         var check = await checkGrammar(_currentWord!.wordStr);
         if (check) {
-          //print('check: $check');
           for (var i = 0; i < _currentWord!.letters.length; i++) {
             status = GameStatus.submitting;
             final currentWordLetter = _currentWord!.letters[i];
@@ -508,7 +409,7 @@ class _WordlePageState extends State<WordlePage> {
         } else {
           Future.delayed(Duration.zero, () {
             ToastOverlay(context)
-                .show(type: ToastType.warning, msg: 'Not in word list');
+                .show(type: ToastType.warning, msg: S.of(context).wordInvalid);
           });
         }
       }
@@ -516,46 +417,51 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   Widget _coinWidget() {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          //borderRadius: BorderRadius.circular(50),
-          color: Colors.transparent,
-          border: Border.all(color: Colors.white, width: 2)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: StreamBuilder<int>(
-              stream: coinStream.coinStream,
-              builder: (_, snapshot) {
-                if (snapshot.hasData) {
-                  String coin = snapshot.data.toString();
-                  if (snapshot.data! >= 1000) {
-                    coin = snapshot.data
-                        .toString()
-                        .replaceRange(coin.length - 3, coin.length, 'K');
-                  }
-                  return Text(
-                    coin,
-                    style: const TextStyle(fontSize: 12),
-                  );
-                }
-                return const Text(
-                  '0',
-                  style: TextStyle(fontSize: 12),
-                );
-              },
-            ),
+    return Consumer<AppState>(
+      builder: (_,state,__){
+        return Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              //borderRadius: BorderRadius.circular(50),
+              color: Colors.transparent,
+              border: Border.all(color: state.isDarkMode ? Colors.white : Colors.black, width: 2)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: StreamBuilder<int>(
+                  stream: coinStream.coinStream,
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData) {
+                      String coin = snapshot.data.toString();
+                      if (snapshot.data! >= 1000) {
+                        coin = snapshot.data
+                            .toString()
+                            .replaceRange(coin.length - 3, coin.length, 'K');
+                      }
+                      return Text(
+                        coin,
+                        style: TextStyle(fontSize: 12, color: state.isDarkMode ? Colors.white : Colors.black),
+                      );
+                    }
+                    return  Text(
+                      '0',
+                      style: TextStyle(fontSize: 12,color: state.isDarkMode ? Colors.white : Colors.black),
+                    );
+                  },
+                ),
+              ),
+               Icon(
+                Icons.currency_bitcoin,
+                size: 12,
+                  color: state.isDarkMode ? Colors.white : Colors.black
+              ),
+            ],
           ),
-          const Icon(
-            Icons.currency_bitcoin,
-            size: 12,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -577,25 +483,43 @@ class _WordlePageState extends State<WordlePage> {
       });
       _speak(
           'Congratulation! the answer is ${solution!.wordStr.toLowerCase()}');
-      Future.delayed(Duration.zero, () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         sharedPrefs.setStringList('collections', collection);
         sharedPrefs.setString(solution!.wordStr, hintWord);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            dismissDirection: DismissDirection.none,
-            duration: const Duration(days: 1),
-            backgroundColor: correctColor,
-            content: const Text(
-              'You won',
-              style: TextStyle(color: Colors.white),
-            ),
-            action: SnackBarAction(
-              onPressed: _restart,
-              label: 'New Game',
-              textColor: Colors.white,
-            ),
-          ),
-        );
+        final appState = context.read<AppState>();
+        Dialogs.materialDialog(
+            color: appState.isDarkMode ? Colors.black: Colors.white,
+            barrierColor: appState.isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+            barrierDismissible: false,
+            msgStyle: TextStyle(color: appState.isDarkMode ? Colors.white : Colors.black),
+            titleStyle: TextStyle(color: appState.isDarkMode ? Colors.white : Colors.black),
+            msg: '${S.of(context).congratulations} ${widget.level-2} coins',
+            title: S.of(context).win,
+            lottieBuilder: LottieBuilder.asset(congrats),
+            context: context,
+            actions: [
+              IconsButton(
+                onPressed: () {
+                  backToLoginPage();
+                },
+                text: S.of(context).back,
+                iconData: Icons.arrow_back,
+                color: Colors.blue,
+                textStyle: const TextStyle(color: Colors.white),
+                iconColor: Colors.white,
+              ),
+              IconsButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _restart();
+                },
+                text: S.of(context).newGame,
+                iconData: Icons.done,
+                color: Colors.blue,
+                textStyle: const TextStyle(color: Colors.white),
+                iconColor: Colors.white,
+              ),
+            ]);
       });
     } else if (_currentWordIndex + 1 >= board!.length) {
       status = GameStatus.lost;
@@ -603,23 +527,41 @@ class _WordlePageState extends State<WordlePage> {
         answer = '${solution?.wordStr}';
       });
       _speak('The answer is ${answer!.toLowerCase()}, good luck for next time');
-      Future.delayed(Duration.zero, () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            dismissDirection: DismissDirection.none,
-            duration: const Duration(days: 1),
-            backgroundColor: Colors.red,
-            content: const Text(
-              'You lost',
-              style: TextStyle(color: Colors.white),
-            ),
-            action: SnackBarAction(
-              onPressed: _restart,
-              label: 'New Game',
-              textColor: Colors.white,
-            ),
-          ),
-        );
+      Future.delayed(const Duration(milliseconds: 500), () {
+        final appState = context.read<AppState>();
+        Dialogs.materialDialog(
+            color: appState.isDarkMode ? Colors.black: Colors.white,
+            barrierColor: appState.isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+            barrierDismissible: false,
+            msgStyle: TextStyle(color: appState.isDarkMode ? Colors.white : Colors.black),
+            titleStyle: TextStyle(color: appState.isDarkMode ? Colors.white : Colors.black),
+            msg: '${S.of(context).theAnswer} ${answer!.toLowerCase()}, ${S.of(context).betterNextTime}',
+            title: S.of(context).failed,
+            lottieBuilder: LottieBuilder.asset(failed),
+            context: context,
+            actions: [
+              IconsButton(
+                onPressed: () {
+                  backToLoginPage();
+                },
+                text: S.of(context).back,
+                iconData: Icons.arrow_back,
+                color: Colors.blue,
+                textStyle: const TextStyle(color: Colors.white),
+                iconColor: Colors.white,
+              ),
+              IconsButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _restart();
+                },
+                text: S.of(context).newGame,
+                iconData: Icons.done,
+                color: Colors.blue,
+                textStyle: const TextStyle(color: Colors.white),
+                iconColor: Colors.white,
+              ),
+            ]);
       });
     } else {
       status = GameStatus.playing;
@@ -630,13 +572,9 @@ class _WordlePageState extends State<WordlePage> {
   Future<bool> checkGrammar(String word) async {
     dynamic str;
     await checkService.checkWord(word: word).then((value) {
-      //print(value.toString());
-      //str = value.toString();
-      //print(value);
       str = value;
       return true;
     }).catchError((e) {
-      print(e);
       return false;
     });
     if (str == null) {
@@ -644,14 +582,12 @@ class _WordlePageState extends State<WordlePage> {
     } else {
       return true;
     }
-    //return false;
   }
 
   Future<void> _restart() async {
     ToastLoadingOverlay toastLoadingOverlay = ToastLoadingOverlay(context);
     toastLoadingOverlay.show();
     await wordleBloc!.genWord(widget.level);
-    //await wordleBloc!.genDefinition();
     toastLoadingOverlay.hide();
     setState(() {
       pos = 0;
@@ -660,18 +596,6 @@ class _WordlePageState extends State<WordlePage> {
       _currentWordIndex = 0;
       board = genBoard(widget.level);
       _flipCardKeys = genFlipCard(widget.level);
-      // board!
-      //   ..clear()
-      //   ..addAll(List.generate(
-      //       widget.level + 1,
-      //       (_) => Word(
-      //           letters: List.generate(widget.level, (_) => Letter.empty()))));
-      // _flipCardKeys!
-      //   ..clear()
-      //   ..addAll(List.generate(
-      //       widget.level + 1,
-      //       (_) => List.generate(
-      //           widget.level, (_) => GlobalKey<FlipCardState>())));
       solution = wordleBloc!.solution;
       hintWord = wordleBloc!.definitions!;
       print('_WordlePageState.restart ${solution!.wordStr} $hintWord');
@@ -679,7 +603,7 @@ class _WordlePageState extends State<WordlePage> {
     keyBoardLetter.clear();
   }
 
-  genBoard(int level) {
+   List<Word>genBoard(int level) {
     if (level == 3) {
       return List.generate(level + 3,
           (_) => Word(letters: List.generate(level, (_) => Letter.empty())));
@@ -689,7 +613,7 @@ class _WordlePageState extends State<WordlePage> {
     }
   }
 
-  genFlipCard(int level) {
+  List<List<GlobalKey<FlipCardState>>> genFlipCard(int level) {
     if (level == 3) {
       return List.generate(level + 3,
           (_) => List.generate(level, (_) => GlobalKey<FlipCardState>()));
@@ -721,31 +645,20 @@ class _WordlePageState extends State<WordlePage> {
   Future<void> onTap() async {
     bool? audioCheck = await sharedPrefs.getBool('audio');
     if (audioCheck!) {
-      //sharedPrefs.setBool('audio', false);
       audioStreamService.setTts(false);
     } else {
-      //sharedPrefs.setBool('audio', true);
       audioStreamService.setTts(true);
     }
-    //print('audio: $audioCheck');
   }
-
-  //Future<void> onTap() async {
-  // await hideSM();
-  // Future.delayed(Duration.zero, () {
-  //   Navigator.pushAndRemoveUntil(
-  //       context,
-  //       MaterialPageRoute(
-  //           builder: (_) => LoginPage(
-  //                 player: widget.player,
-  //                 isPlaying: widget.isPlaying,
-  //               )),
-  //       (route) => false);
-  // });
-  // }
-
-  Future<void> hideSM() async {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  void backToLoginPage(){
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (_) => LoginPage(
+              player: widget.player,
+              isPlaying: isPlaying,
+            )),
+            (route) => false);
   }
 
   Future _speak(String text) async {

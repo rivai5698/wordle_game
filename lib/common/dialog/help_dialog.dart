@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:wordle/const/assets_const.dart';
+import 'package:wordle/service/app_state.dart';
+
+import '../../generated/l10n.dart';
 
 class HelpDialog {
   final BuildContext context;
-  HelpDialog(this.context);
+  final String imgUrl;
+  HelpDialog(this.context, this.imgUrl);
   void showDialog() {
     showGeneralDialog(
         barrierDismissible: false,
@@ -55,11 +60,11 @@ class HelpDialog {
                         topRight: Radius.circular(16),
                       ),
                     ),
-                    child: const Align(
+                    child:  Align(
                       alignment: Alignment.center,
                       child: Text(
-                        'HOW TO PLAY',
-                        style: TextStyle(
+                        S.of(context).htp,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -70,7 +75,7 @@ class HelpDialog {
                   Container(
                     decoration: BoxDecoration(color: Colors.yellow.shade200),
                     child: Image.asset(
-                      'assets/helpimg.png',
+                      imgUrl,
                       fit: BoxFit.fitHeight,
                     ),
                   ),
@@ -91,7 +96,7 @@ class HelpDialog {
                     borderRadius: BorderRadius.circular(50),
                     color: Colors.yellow.shade300,
                     border: Border.all(color: Colors.brown, width: 2)),
-                child: LottieBuilder.asset('assets/closebutton.json'),
+                child: LottieBuilder.asset(closeButton),
               ),
             ),
           ),

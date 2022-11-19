@@ -17,11 +17,9 @@ class CollectionBloc {
     collection.clear();
     await sharedPrefs.init();
     List<String>? a = await sharedPrefs.getStringList('collections');
-    //print('CollectionBloc.init $a');
     Future.delayed(Duration.zero, () {
       if (a != null) {
         collection.addAll(a);
-        //print('CollectionBloc.init $collection');
         _collectionStreamController.add(collection);
       } else {
         collection.addAll([]);

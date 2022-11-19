@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:wordle/const/assets_const.dart';
 
 class SuggestionDialog {
   final BuildContext context;
@@ -98,7 +99,7 @@ class SuggestionDialog {
                     borderRadius: BorderRadius.circular(50),
                     color: Colors.yellow.shade300,
                     border: Border.all(color: Colors.brown, width: 2)),
-                child: LottieBuilder.asset('assets/closebutton.json'),
+                child: LottieBuilder.asset(closeButton),
               ),
             ),
           ),

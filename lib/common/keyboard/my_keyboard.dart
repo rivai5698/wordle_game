@@ -125,8 +125,8 @@ class _KeyBoardButton extends StatelessWidget {
             child: Text(
               letter,
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

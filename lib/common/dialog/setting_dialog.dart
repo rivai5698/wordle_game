@@ -1,8 +1,11 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
+import 'package:wordle/const/assets_const.dart';
 import 'package:wordle/service/audio_service.dart';
 
+import '../../generated/l10n.dart';
 import '../../service/shared_preferences_manager.dart';
 
 class SettingDialog {
@@ -43,6 +46,7 @@ class SettingDialog {
 
   Widget _myDialog(bool isPlaying, bool audioCheck) {
     //var stream = AudioService();
+    bool positive = false;
     return Container(
       width: double.infinity,
       height: 300,
@@ -71,11 +75,11 @@ class SettingDialog {
                         topRight: Radius.circular(16),
                       ),
                     ),
-                    child: const Align(
+                    child:  Align(
                       alignment: Alignment.center,
                       child: Text(
-                        'SETTINGS',
-                        style: TextStyle(
+                        S.of(context).setting,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -117,110 +121,116 @@ class SettingDialog {
                           height: 180,
                           width: double.infinity,
                           margin: const EdgeInsets.symmetric(horizontal: 7),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              StreamBuilder<bool>(
-                                stream: audioStreamService.ttsStream,
-                                  builder: (_,snapshot){
-                                  if(snapshot.hasData){
-                                    return NiceButtons(
-                                      stretch: false,
-                                      startColor: Colors.green.shade300,
-                                      endColor: Colors.green,
-                                      borderColor: Colors.green,
-                                      width: 100,
-                                      height: 60,
-                                      gradientOrientation:
-                                      GradientOrientation.Horizontal,
-                                      onTap: (finish) async {
-                                        bool? audioCheck = await sharedPrefs.getBool('audio');
-                                        if(audioCheck!){
-                                          //sharedPrefs.setBool('audio', false);
-                                          audioStreamService.setTts(false);
-                                        }else{
-                                          //sharedPrefs.setBool('audio', true);
-                                          audioStreamService.setTts(true);
-                                        }
-                                      },
-                                      child: snapshot.data! ? const Icon(Icons.volume_up) : const Icon(Icons.volume_off),
-                                    );
-                                  }
-                                return NiceButtons(
-                                  stretch: false,
-                                  startColor: Colors.green.shade300,
-                                  endColor: Colors.green,
-                                  borderColor: Colors.green,
-                                  width: 100,
-                                  height: 60,
-                                  gradientOrientation:
-                                  GradientOrientation.Horizontal,
-                                  onTap: (finish) => onTap(),
-                                  child: audioCheck ? const Icon(Icons.volume_up) : const Icon(Icons.volume_off),
-                                );
-                              },),
-
-                              StreamBuilder<bool>(
-                                stream: audioStreamService.audioStream,
-                                builder: (_, snapshot) {
-                                  if (snapshot.hasData) {
-                                    //var check = snapshot.data;
-                                    //print('a: $check');
-                                    return NiceButtons(
-                                      stretch: false,
-                                      startColor: Colors.green.shade300,
-                                      endColor: Colors.green,
-                                      borderColor: Colors.green,
-                                      width: 100,
-                                      height: 60,
-                                      gradientOrientation:
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  StreamBuilder<bool>(
+                                    stream: audioStreamService.ttsStream,
+                                    builder: (_,snapshot){
+                                      if(snapshot.hasData){
+                                        return NiceButtons(
+                                          stretch: false,
+                                          startColor: Colors.green.shade300,
+                                          endColor: Colors.green,
+                                          borderColor: Colors.green,
+                                          width: 100,
+                                          height: 60,
+                                          gradientOrientation:
                                           GradientOrientation.Horizontal,
-                                      onTap: (finish) {
-                                        //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
-                                        if (audioStreamService.assetsAudioPlayer
-                                            .isPlaying.value) {
-                                          audioStreamService.pauseAudio();
-                                          sharedPrefs.setBool('isPlayed', false);
-                                        } else {
-                                          audioStreamService.init();
-                                          sharedPrefs.setBool('isPlayed', true);
-                                        }
-                                      },
-                                      child: snapshot.data!
-                                          ? const Icon(Icons.music_note)
-                                          : const Icon(Icons.music_off),
-                                    );
-                                  }
-                                  //return CircularProgressIndicator();
-                                  return NiceButtons(
-                                    stretch: false,
-                                    startColor: Colors.green.shade300,
-                                    endColor: Colors.green,
-                                    borderColor: Colors.green,
-                                    width: 100,
-                                    height: 60,
-                                    gradientOrientation:
-                                        GradientOrientation.Horizontal,
-                                    onTap: (finish) {
-                                      //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
-                                      if (audioStreamService
-                                          .assetsAudioPlayer.isPlaying.value) {
-                                        audioStreamService.pauseAudio();
-                                        sharedPrefs.setBool('isPlayed', false);
-                                      } else {
-                                        audioStreamService.init();
-                                        sharedPrefs.setBool('isPlayed', true);
-
+                                          onTap: (finish) async {
+                                            bool? audioCheck = await sharedPrefs.getBool('audio');
+                                            if(audioCheck!){
+                                              //sharedPrefs.setBool('audio', false);
+                                              audioStreamService.setTts(false);
+                                            }else{
+                                              //sharedPrefs.setBool('audio', true);
+                                              audioStreamService.setTts(true);
+                                            }
+                                          },
+                                          child: snapshot.data! ? const Icon(Icons.volume_up) : const Icon(Icons.volume_off),
+                                        );
                                       }
+                                      return NiceButtons(
+                                        stretch: false,
+                                        startColor: Colors.green.shade300,
+                                        endColor: Colors.green,
+                                        borderColor: Colors.green,
+                                        width: 100,
+                                        height: 60,
+                                        gradientOrientation:
+                                        GradientOrientation.Horizontal,
+                                        onTap: (finish) => onTap(),
+                                        child: audioCheck ? const Icon(Icons.volume_up) : const Icon(Icons.volume_off),
+                                      );
+                                    },),
+
+                                  StreamBuilder<bool>(
+                                    stream: audioStreamService.audioStream,
+                                    builder: (_, snapshot) {
+                                      if (snapshot.hasData) {
+                                        //var check = snapshot.data;
+                                        //print('a: $check');
+                                        return NiceButtons(
+                                          stretch: false,
+                                          startColor: Colors.green.shade300,
+                                          endColor: Colors.green,
+                                          borderColor: Colors.green,
+                                          width: 100,
+                                          height: 60,
+                                          gradientOrientation:
+                                          GradientOrientation.Horizontal,
+                                          onTap: (finish) {
+                                            //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
+                                            if (audioStreamService.assetsAudioPlayer
+                                                .isPlaying.value) {
+                                              audioStreamService.pauseAudio();
+                                              sharedPrefs.setBool('isPlayed', false);
+                                            } else {
+                                              audioStreamService.init();
+                                              sharedPrefs.setBool('isPlayed', true);
+                                            }
+                                          },
+                                          child: snapshot.data!
+                                              ? const Icon(Icons.music_note)
+                                              : const Icon(Icons.music_off),
+                                        );
+                                      }
+                                      //return CircularProgressIndicator();
+                                      return NiceButtons(
+                                        stretch: false,
+                                        startColor: Colors.green.shade300,
+                                        endColor: Colors.green,
+                                        borderColor: Colors.green,
+                                        width: 100,
+                                        height: 60,
+                                        gradientOrientation:
+                                        GradientOrientation.Horizontal,
+                                        onTap: (finish) {
+                                          //print('SettingDialog._myDialog ${audioStreamService.assetsAudioPlayer.isPlaying.value}');
+                                          if (audioStreamService
+                                              .assetsAudioPlayer.isPlaying.value) {
+                                            audioStreamService.pauseAudio();
+                                            sharedPrefs.setBool('isPlayed', false);
+                                          } else {
+                                            audioStreamService.init();
+                                            sharedPrefs.setBool('isPlayed', true);
+
+                                          }
+                                        },
+                                        child: isPlaying
+                                            ? const Icon(Icons.music_note)
+                                            : const Icon(Icons.music_off),
+                                      );
                                     },
-                                    child: isPlaying
-                                        ? const Icon(Icons.music_note)
-                                        : const Icon(Icons.music_off),
-                                  );
-                                },
+                                  ),
+                                ],
                               ),
+
                             ],
-                          ),
+                          )
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -264,7 +274,7 @@ class SettingDialog {
                     color: Colors.yellow.shade300,
                     border: Border.all(color: Colors.brown, width: 2)),
                 child:
-                  LottieBuilder.asset('assets/closebutton.json')
+                  LottieBuilder.asset(closeButton)
                 // const Icon(
                 //   Icons.close,
                 //   size: 24,

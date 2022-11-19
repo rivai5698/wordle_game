@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:wordle/const/const_color.dart';
+import 'package:wordle/service/app_state.dart';
 
 class Letter extends Equatable {
   final String val;

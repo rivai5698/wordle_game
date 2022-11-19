@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:wordle/common/toast/toast_overlay.dart';
+import 'package:wordle/const/assets_const.dart';
 import 'package:wordle/service/shared_preferences_manager.dart';
 import 'package:wordle/wordle/module/game/coin_bloc.dart';
+
+import '../../generated/l10n.dart';
 
 class CoinDialog {
   final BuildContext context;
@@ -33,7 +36,7 @@ class CoinDialog {
     double heightDevice = MediaQuery.of(context).size.height;
     return Container(
       width: double.infinity,
-      height: heightDevice < 680 ? 400 : 450,
+      height: heightDevice < 680 ? 250 : 300,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -105,10 +108,15 @@ class CoinDialog {
                           ),
                           Container(
                             margin: const EdgeInsets.all(8),
-                            height: 150,
+                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+                            //height: 150,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.brown.shade300),
+                            ),
                             child: TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Input Code: ',
+                              decoration:  InputDecoration(
+                                labelText: '${S.of(context).ipc}: ',
                                 counterText: '',
                               ),
                               textCapitalization: TextCapitalization.characters,
@@ -126,13 +134,13 @@ class CoinDialog {
                                       Future.delayed(Duration.zero, () {
                                         ToastOverlay(context).show(
                                             type: ToastType.success,
-                                            msg: 'You have claimed 1000 coins');
+                                            msg: S.of(context).claimSuccess);
                                       });
                                     } else {
                                       Future.delayed(Duration.zero, () {
                                         ToastOverlay(context).show(
                                             type: ToastType.error,
-                                            msg: 'Code is invalid');
+                                            msg: S.of(context).codeInvalid);
                                       });
                                     }
                                   } else {
@@ -140,13 +148,13 @@ class CoinDialog {
                                       Future.delayed(Duration.zero, () {
                                         ToastOverlay(context).show(
                                             type: ToastType.warning,
-                                            msg: 'You have claimed this code');
+                                            msg: S.of(context).claimedCode);
                                       });
                                     } else {
                                       Future.delayed(Duration.zero, () {
                                         ToastOverlay(context).show(
                                             type: ToastType.error,
-                                            msg: 'Code is invalid');
+                                            msg: S.of(context).codeInvalid);
                                       });
                                     }
                                   }
@@ -164,6 +172,7 @@ class CoinDialog {
             right: 0,
             child: GestureDetector(
               onTap: () {
+                coinStream.initCoin();
                 Navigator.pop(context);
               },
               child: Container(
@@ -173,7 +182,7 @@ class CoinDialog {
                     borderRadius: BorderRadius.circular(50),
                     color: Colors.yellow.shade300,
                     border: Border.all(color: Colors.brown, width: 2)),
-                child: LottieBuilder.asset('assets/closebutton.json'),
+                child: LottieBuilder.asset(closeButton),
               ),
             ),
           ),
