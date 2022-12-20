@@ -1,3 +1,4 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -316,6 +317,9 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   void _onKeyTap(String val) {
+    if(audioStreamService.audioCheck!){
+      playAudio();
+    }
     if (status == GameStatus.playing) {
       setState(() {
         pos = pos + 1;
@@ -325,6 +329,9 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   void _onDelTap() {
+    if(audioStreamService.audioCheck!){
+      playAudio();
+    }
     if (status == GameStatus.playing) {
       setState(() {
         if (pos > 0) {
@@ -336,6 +343,9 @@ class _WordlePageState extends State<WordlePage> {
   }
 
   Future<void> _onEnterTap() async {
+    if(audioStreamService.audioCheck!){
+      playAudio();
+    }
     if (status == GameStatus.playing &&
         _currentWord != null &&
         !_currentWord!.letters.contains(Letter.empty())) {
@@ -669,5 +679,18 @@ class _WordlePageState extends State<WordlePage> {
       await flutterTts.setPitch(1);
       await flutterTts.speak(text);
     }
+  }
+
+  playAudio() {
+    AssetsAudioPlayer aaP = AssetsAudioPlayer();
+    aaP.open(
+      Audio(audioTapAsset),
+      autoStart: true,
+      showNotification: true,
+      loopMode: LoopMode.single,
+    );
+    Future.delayed(const Duration(milliseconds: 500),(){
+      aaP.stop();
+    });
   }
 }

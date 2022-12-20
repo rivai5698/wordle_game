@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:wordle/const/assets_const.dart';
 import 'package:wordle/service/shared_preferences_manager.dart';
 
 class AudioService {
@@ -47,7 +48,7 @@ class AudioService {
 
   playAudio() {
      assetsAudioPlayer.open(
-      Audio("assets/audiobackground.mp3"),
+      Audio(audioAsset),
       autoStart: true,
       showNotification: true,
       loopMode: LoopMode.single,

@@ -1,5 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nice_buttons/nice_buttons.dart';
 import 'package:provider/provider.dart';

@@ -1,4 +1,5 @@
 const audioAsset = 'assets/audiobackground.mp3';
+const audioTapAsset = 'assets/tapaudio.mp3';
 const lightBackButton = 'assets/backbutton.json';
 const darkBackButton = 'assets/darkbackbutton.json';
 const lightSettingButton = 'assets/settingbutton.json';
